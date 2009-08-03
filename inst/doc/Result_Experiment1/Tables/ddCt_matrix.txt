@@ -1,0 +1,4 @@
+""	"Sample1"	"Sample2"
+"Gene1"	0	-3.09
+"Gene2"	0	3.09
+"Gene3"	0	1.55

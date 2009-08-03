@@ -1,0 +1,11 @@
+Package: ddCt
+Title: Performing the ddCt method for taqman data
+Version: 0.99.0
+Date: 2009-07-26
+Author: Rudolf Biczok, Markus Ruschhaupt and Jitao David Zhang
+Description: This package includes a functions to perform the ddCt method for TaqMan data
+Maintainer: Jitao David Zhang <j.zhang@dkfz.de>
+License: LGPL-3
+Depends: R (>= 2.3.0), Biobase (>= 1.10.0), RColorBrewer (>= 0.1-3), xtable, lattice, methods
+Collate: AllClasses.R AllGenerics.R AllFunctions.R AllMethods.R AllGlobals.R absoluteQ.R ddCtSplit.R output.R visualization.R
+

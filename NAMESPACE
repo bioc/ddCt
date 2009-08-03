@@ -1,0 +1,54 @@
+################################################################################
+##
+## This software is created by Molecular Genom Analysis Group
+## Department of German Cancer Research Center in Heidelberg
+##
+##
+##  NAMESPACE
+##  Created on: Oct 23, 2008
+##      Author: Rudolf Biczok <r.biczok@dkfz-heidelberg.de>
+##      Description: ddCt NAMESPACE file
+##
+################################################################################
+
+import("Biobase")
+
+#exportPattern("^[[:alpha:]]+")
+
+exportClasses(ddCtExpression,SDMFrame)
+
+export(
+       barploterrbar,
+       ddCtAbsolute,
+       #ddCtSplit,
+       #ddCtErrBarchart,
+       elist,
+       elistWrite,
+       errBarchart,
+       SDMFrame,
+       readSDM,
+       #writeLines.ddCt,
+       write.htmltable)
+
+ exportMethods(level,
+               levelErr,
+               Ct,
+               CtErr,
+               dCt,
+               dCtErr,
+               ddCt,
+               ddCtErr,
+               numberCt,
+               numberNA,
+               detectorNames,
+               ddCtExpression,
+               "detectorNames<-",
+               errBarchart,
+               fileNames,
+               sampleNames,
+               "sampleNames<-",
+               uniqueDetectorNames,
+               "uniqueDetectorNames<-",
+               uniqueSampleNames,
+               "uniqueSampleNames<-"
+               )

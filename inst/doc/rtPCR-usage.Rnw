@@ -1,0 +1,629 @@
+%\VignetteIndexEntry{Analyse RT-PCR data with the end-to-end script in ddCt package}
+%\VignetteDepends{Biobase,ddCt, RColorBrewer, lattice, xtable}
+%\VignetteKeywords{taqman,ddCt}
+%\VignettePackage{ddCt}
+\documentclass[11pt]{article}
+
+\usepackage{times}
+\usepackage{hyperref}
+\usepackage{listings}
+\usepackage{geometry}
+\usepackage{longtable}
+\usepackage[pdftex]{graphicx}
+\usepackage{array}
+\usepackage{colortbl, xcolor}
+\SweaveOpts{keep.source=TRUE,eps=FALSE,pdf=TRUE,prefix=FALSE} 
+
+\usepackage[authoryear,round]{natbib}
+\usepackage{times}
+
+\textwidth=6.2in
+\textheight=8.5in
+%\parskip=.3cm
+\oddsidemargin=.1in
+\evensidemargin=.1in
+\headheight=-.3in
+
+\newcommand{\scscst}{\scriptscriptstyle}
+\newcommand{\scst}{\scriptstyle}
+\newcommand{\R}[1]{{\textsf{#1}}}
+\newcommand{\Rfunction}[1]{{\texttt{#1}}}
+\newcommand{\Robject}[1]{{\texttt{#1}}}
+\newcommand{\Rpackage}[1]{{\textit{#1}}}
+\newcommand{\Rclass}[1]{{\textit{#1}}}
+\newcommand{\Metas}[1]{{\texttt{#1}}}
+\newcommand{\myincfig}[3]{%
+  \begin{figure}[htbp]
+    \begin{center}
+      \includegraphics[width=#2]{#1}
+      \caption{\label{#1}#3}
+    \end{center}
+  \end{figure}
+}
+
+\def\TReg{\textsuperscript{\textregistered}}
+\def\TCop{\textsuperscript{\textcopyright}}
+\def\TTra{\textsuperscript{\texttrademark}}
+\def\Ct{$C_T$}
+\def\dCt{$dC_T$}
+\def\ddCt{$ddC_T$}
+
+\bibliographystyle{plainnat}
+
+\begin{document}
+\setkeys{Gin}{width=0.9\textwidth}
+\title{Analyse RT--PCR data with \Rpackage{ddCt}}
+\author{Jitao David Zhang, Rudolf Biczok and Markus Ruschhaupt}
+\maketitle
+
+\begin{abstract}
+  Quantitative real--time PCR (qRT--PCR or RT--PCR for short) is a laboratory technique based
+  on the polymerase chain reaction, and is commonly used to amplify
+  and quantify a targeted nucleotide molecule simultaneously. The data
+  analysis of qRT--PCR experiments can be divided in subsequent steps:
+  importing the data, setting reference sample(s) and housekeeping gene(s),
+  (optional) filtering, applying algorithm for the relative
+  expression, and finally reporting the results in the form of text and
+  figure. \Rpackage{ddCt} package implements the $2^{-\Delta \Delta
+    C_{T}}$ algorithm in a pipeline as described above and performs
+  end--to--end analysis of qRT-PCR experiments in \R{R} and
+  \R{Bioconductor}. In this vignette we introduce the usage of the
+  pipeline\footnote{For more general information about qRT--PCR and the  $2^{-\Delta \Delta
+    C_{T}}$ algorithm, please follow the another vignette
+  \textit{rtPCR} released along the package \Rpackage{ddCt}.}.
+\end{abstract}
+
+This vignette introduces the analysis of RT--PCR data with \Rpackage{ddCt} by a
+step--to--step guide through the pipeline. The idea is that the user
+could read the vignette, modify the parameters to her/his need, and
+then use the \Rfunction{Sweave} function in \R{R} to perform the
+analysis. The \Rfunction{Sweave} function converts the '.Rnw' version into a
+\LaTeX{} file while processing the RT--PCR data in the background. It
+gives the same result as if the user invokes the pipeline in the way
+described in the section~\ref{sec:rscript}.
+
+The vignette begins with a short description of the values to be
+calculated by the \Rpackage{ddCt}. Then it explains the paramters to
+be specified by the user in depth.
+
+\section{Introduction}
+
+Several values are calculated during pipeline by Sweaving this
+document. The most important ones are explained here in the order of
+the execution. To simply the discussion, the values discussed are calculated without efficiencies (see below). 
+
+\begin{enumerate}
+\item{The mean or median of the technical replicates for one gene--sample pair combination is the $C_T$ value.}
+\item{For a sample $A$ the $C_T$ value of the housekeeping gene (or the median of the $C_T$ values of
+all housekeeping genes) is subtracted from the corresponding $C_T$
+value of a gene $Gene1$. The result is the $dC_T$ value for $Gene1$ and
+sample $A$. This value is used for the \emph{t-test} and the \emph{Wilcoxon test}.}
+\item{For a gene $Gene1$ the $dC_T$ value of the reference sample (or the mean of the $dC_T$ values of
+all reference samples) is subtracted from the corresponding  $dC_T$ value of
+$Gene1$ and a sample $B$. This is called the $ddC_T$ value for $Gene1$ and sample $B$.}
+\item{The transformation $x \rightarrow 2^{-x}$ is applied to each $ddC_T$
+value. The resulting value is called 'level'.}
+\end{enumerate}
+%
+
+Additionally, for each value an error is calculated. This is based on the
+standard error of the mean (\emph{S.E.M}) if the mean is used to summarize the replicates. If
+the median is used for summarization of the individual Ct values, the
+MAD\footnote{median absolute deviation, defined as
+  $MAD=median|x_i-\tilde{x}|$, where $\tilde{x}$ is the median of
+  $x$. Its relationship with standard deviation $\sigma$ can be
+  expressed as $\sigma \approx 1.4826 MAD$} divided by the square root
+of replicate number is used as an error estimate.
+
+<<setup,echo=FALSE,results=hide>>= 
+options(width=50)
+@
+
+\section{Prerequisites}
+
+The package \Rpackage{ddCt} requires the latest version of \R{R} to perform properly. Please check the \textsf{DESCRIPTION} file along the package for the
+requirement of packages.
+
+To run this document and perform
+the analysis, you need a tab-delimited plain text file containing the individual Ct values of your experiment. This file
+is usually exported from the software used to measure the Ct values,
+for example from SDM\TCop Software of Roche Coop.. It is important
+that you export the individual Ct values, since normally the software
+combines the replicates of the measurements to one value. See the file
+\emph{extdata/Experiment1.txt} in the directory of the
+\Rpackage{ddCt} package for an example.
+
+Once the file is ready you can go on to set parameters.
+
+
+\section{Using \Rpackage{ddCt}}
+
+\subsection{Invoke the pipeline}\label{sec:rscript}
+To use the functionality of the \Rpackage{ddCt} package, one can
+\begin{itemize}
+\item Writting \R{R} scripts with the functions implemented in the
+  \Rpackage{ddCt}. It requires basic programming skills but provides
+  the maximum flexibility. See the vignette \emph{rtPCR} for a short
+  example and the manual pages of the functions in the package.
+\item Calling the \emph{ddCt} script in the \emph{scripts}
+  sub--directory in the \Rpackage{ddCt} installation package. This
+  script can be invoked by either typing in the command line, or by
+  modifying the parameters in this vigenette and then run the
+  \Rfunction{Sweave} function. Actually this vignette is just a
+  wrapper of the \emph{ddCt} script which describes the parameters. In
+  the vigette we discuss this approach.
+\end{itemize}
+
+When using the \emph{ddCt} script, One can call the \emph{ddCt} script in the \emph{scripts}
+sub--directory in the \Rpackage{ddCt} installation package (\emph{PKG\_DIR} in the
+following samples) via the \emph{Rscript} command in the command
+line\footnote{The examples shown here are for \R{Debian Linux} system,
+on the windows system the path separator has to be modified, however
+the functionality is the same}:
+
+\lstset{language=sh}
+\begin{lstlisting}
+Rscript PKG_DIR/scripts/ddCt.R -inputFile="PKG_DIR/extdata/Experiment1.txt" ....
+\end{lstlisting}
+
+This command-line approach does not need to invoke a R session and is
+easy to be built into automatic analysis pipelines. It is however hard
+to know all the possible parameters and not easy to be used
+by users who are not familiar with the command line.
+
+Alternatively, one could load the script via the source function in
+the R prompt. If you do so, you have to pass the parameters as a list
+to the \Rfunction{ddCtExec} function, which is an end--to--end
+function combining data import, analysis and report:
+
+<<exec ddCt inside R, eval=FALSE, echo=TRUE>>=
+scFile <- system.file("scripts/ddCt.R", package="ddCt")
+inputFile <- system.file("extdata/Experiment1.txt", package="ddCt")
+source(scFile)
+ddCtExec(list(inputFile=inputFile, ...))
+@ 
+
+\noindent The parameters for the ddCtExec function are all equal with
+parameters in the Rscript call.
+
+\noindent In this example, we use the second way to invoke the
+\Rpackage{ddCt} package.
+
+<<load ddct>>=
+source(system.file("scripts", "ddCt.R", package="ddCt"))
+@
+
+\subsection{Parameters}
+
+Table~\ref{tbl:par} on the page~\pageref{tbl:par} illustrates the usable parameters in the ddCt.R script.
+Not all parameters have to be set or they already have default values.
+Only \texttt{inputFile}, \texttt{referenceGene} and \texttt{referenceSample} are 
+required parameters.
+
+\definecolor{titlegrey}{gray}{0.65}
+
+\begin{center}
+  \begin{small}
+\begin{longtable}{| l | p{4cm} | c | p{6cm} |}
+    \caption[List of parameters]{\normalsize List of parameters\label{tbl:par}} \\
+    \hline
+    
+    \endfirsthead
+    \multicolumn{4}{c}%
+    {{\bfseries \tablename\ \thetable{} -- continued from previous page}} \\
+    \hline 
+    \multicolumn{1}{|>{\columncolor{titlegrey}}l|}{\textbf{Parameter}} &
+    \multicolumn{1}{>{\columncolor{titlegrey}}p{4cm}|}{\textbf{Description}} &
+    \multicolumn{1}{>{\columncolor{titlegrey}}c|}{\textbf{Required}} &
+    \multicolumn{1}{>{\columncolor{titlegrey}}p{6cm}|}{\textbf{Default}}
+    \\ \hline 
+    \endhead
+    \hline \multicolumn{4}{|r|}{{Continued on next page}} \\ \hline
+    \endfoot
+    \hline \hline
+    \endlastfoot
+    \rowcolor{titlegrey}
+    \textbf{Parameter} & \textbf{Description} & \textbf{Required} & \textbf{Default} \\
+    \hline
+    inputFile & a valid SDS input file & Yes & \Robject{NULL} \\
+    referenceGene & houskeeping gene to use& Yes & \Robject{NULL} \\
+    referenceSample & calibration sample to use & Yes & \Robject{NULL} \\
+    \hline
+    loadPath & directory, from which the input files are loaded & No & Working directory \\
+    savePath & output directory & No & Working directory \\
+    confFile & load parameters from this R script & No & \Robject{NULL} \\
+    sampleAnnotationFile & optional annotation file & No & \Robject{NULL} \\
+    columnForGrouping & columns used to group output & No & \Robject{NULL} \\
+    onlyFromAnnotation & only use annotated samples & No & \Robject{FALSE} \\
+    geneAlias & replace specified gene names & No & \Robject{NULL} \\
+    sampleAlias & replace specified sample names & No & \Robject{NULL} \\
+    threshold & threshold value & No & 40 \\
+    mode & the used algorithm mode & No & median \\
+    plotMode & the kind of values which schould be ploted (Ct, level, ...)& No & c("level","Ct") \\
+    algorithm & use ddCt or ddCtWihtE algorithm & No & ddCt \\
+    efficiencies & efficience vaue for each gene & No & \Robject{NULL} \\
+    efficienciesError & error value & No & \Robject{NULL} \\
+    genesRemainInOutput & show only these specified genes in output & No & \Robject{NULL} \\
+    samplesRemainInOutput & show only these specified genessamples in output & No & \Robject{NULL} \\
+    genesNotInOutput & dont show these specified genes in output & No & \Robject{NULL} \\
+    samplesNotInOutput & dont show these specified genessamples in output & No & \Robject{NULL} \\
+    groupingBySamples & plot output by & No & \Robject{TRUE} \\
+    plotPerObject & generate one plot per kind of value (Ct, level, ...) & No & \Robject{TRUE} \\
+    groupingForPlot & group also in plot & No & \Robject{NULL} \\
+    groupingColor & The color for each bar & No & \footnotesize{c("\#E41A1C","\#377EB8","\#4DAF4A",\linebreak "\#984EA3","\#FF7F00")} \\
+    cutoff & cutoff value & No & \Robject{NULL} \\
+    brewerColor & color for the brewer & No & \footnotesize{c("Set3","Set1","Accent",\linebreak "Dark2","Spectral","PuOr","BrBG")} \\
+    legend & show legend & No & \Robject{TRUE} \\
+    ttestPerform & perform a TTest & No & \Robject{FALSE} \\
+    ttestCol & color of the TTest & No & \Robject{NULL} \\
+    pairsCol & color of the pairs & No & \Robject{NULL} \\
+    samplesRemainInTTest & use this samples for TTest & No & \Robject{NULL} \\
+    samplesNotInTTest & dont use this samples for TTest & No & \Robject{NULL} \\
+    samplesRemainInCor & use this samples for correlation plot & No & \Robject{NULL} \\
+    samplesNotInCor & dont use this samples for correlation plot & No & \Robject{NULL} \\
+    \hline
+    \hline
+  \end{longtable}
+  \end{small}
+\end{center}
+
+\section{Setting parameters}
+
+\subsection{Input and output directories}
+First you have to specify the directory where your data is stored (\Robject{loadPath}) and the
+directory where the results are supposed to be stored (\Robject{savePath}). You can specify the
+path relatively to the directory you are in when starting the script in R. 
+
+<<specifyFiles,results=hide>>=
+params <- list(loadPath = system.file("extdata", package="ddCt"),
+               savePath = getwd())  
+@
+
+\subsection{Input files}
+Then you have to specify the name of the exported file from the
+RT--PCR device containing the individual Ct values
+(\Robject{inputFile}). Optionally, you may specify a file containing
+additional annotation data related to the samples (\Robject{sampleAnnotationFile}). 
+Refer to the file 'SampleAnno.txt' released along the
+package as an example. The file should be a tab-delimited with several columns and one row for
+each sample. The first column must has the column name of 'Sample' and
+include the sample names. Also a valid annotation file is in the form of Table~\ref{tbl:ann}:
+
+\begin{table}[!ht]
+    \begin{center}
+        \begin{tabular}{llll}
+          Sample & Variable1 & Variable2 & Variable3 \\
+          Sample2 & 1 & 0 & 1 \\
+          Sample1 & 1 & 1 & 1 \\
+        \end{tabular}
+    \end{center}
+  \caption{Simple structure of an annotation file}\label{tbl:ann}
+\end{table}
+
+This file with additional information is important if you
+want to perform the t--test, if you use special colors for groups of samples, or if you want the samples to be grouped according
+to one column of the sample annotation file that can be specified through the parameter
+\Robject{columnForGrouping}. If none of these is important, just
+set all parameters to \Robject{NULL}. This also holds true for other parameters described
+below: setting \Robject{NULL} will make the \Rpackage{ddCt} neglect
+the parameter. If you have a sample annotation file
+and want to include only samples from this file into your final object, you
+can set the parameter 'useOnlySamplesFromAnno'.
+
+<<The Data>>=
+params$confFile <- system.file("scripts", "ddCt.conf", package="ddCt")
+params$inputFile <- c("Experiment1.txt")
+params$sampleAnnotationFile = NULL
+params$columnForGrouping    = NULL
+params$onlyFromAnnotation   = FALSE
+@
+
+
+%--------------------------------
+\subsection{Change gene names and sample names (optional)}
+%--------------------------------
+
+You may change gene names and sample names, for instance to make the
+figure report of the data pretty. These can be done in the
+\Rpackage{ddCt} package.
+
+In the following example, 'Gene1' will become 'Gene A', 'Gene4' will become 'Gene B', and
+so on. In the final plot, 'Gene A' will be plotted first, then 'Gene B' followed by
+'Gene C', 'HK1' and finally 'HK2', which is the result of default
+ordering or factor. If you want to rename genes, {\bf all} genes have to be
+included into this list, otherwise an error will be raised. 
+
+The rename of the samples follow a similar way by setting the variable
+\Robject{sampleAlias} in the \Robject{params} list.
+
+<<transform, echo=TRUE>>=
+#params$geneAlias   = c("Gene1"="Gene A",
+#                       "Gene4"="Gene B",
+#			"Gene5"="Gene C",
+#			"Gene2"="HK1",
+#			"Gene3"="HK2")
+#params$sampleAlias = NULL
+@
+
+\noindent {\bf Attention:} If you rename genes or samples, the new names must be
+used for the parameters in the settings below. 
+
+\noindent In the commald-line you can set sutch a parameter in this way:
+
+\lstset{language=sh}
+\begin{lstlisting}
+Rscript ddCt.R -geneAlias=Gene1="Gene A",Gene2="Gene B" ...
+\end{lstlisting}
+
+
+%--------------------------------
+\subsection{Housekeeping genes and reference samples}
+%--------------------------------
+
+To calculate relative expression, one has to specify the housekeeping gene(s) and the reference
+sample(s). In this sample, one reference sample and two housekeeping
+genes are used. If more than one object is specified, the names have to be given as
+shown in this example.
+
+If you specify more than one housekeeping gene, the software will use the mean
+of the $C_t$ values of the housekeeping genes for the normalization. If you use more
+than one sample, the algorithm uses the mean of the chosen samples as the
+reference.
+
+<<housekeeping>>=
+params$referenceGene <- c("Gene1", "Gene2")
+params$referenceSample <- c("Sample1")
+@
+
+\noindent The comand-line version would look like this:
+
+\lstset{language=sh}
+\begin{lstlisting}
+Rscript ddCt.R -referenceGene=Gene1,Gene2 ...
+\end{lstlisting}
+
+You may set a threshold to filter the $C_T$ values, which is used to set
+an upper boundary of the $C_T$ value to be considered. Any $C_T$ value above this
+threshold will be treated as 'undetermined'. 
+<<threshold>>=
+params$threshold <- 40
+@
+
+And next step you have to specify if you want to use the 'mean' or the
+'median' to summarize the individual \Ct values for a gene/sample combination.
+The median is often more appropriate when replicate number is large since it is more robust.
+<<mode>>=
+params$mode = "median"
+@
+
+%--------------------------------
+\subsection{Efficiencies (optional)}
+%--------------------------------
+
+\noindent You may include amplification efficiency for each gene (see
+the vignette \emph{rtPCR} for more background information). There is also the possibility to include error estimates for the
+efficiencies (for example the standard deviation). These estimates will be used for the
+error calculation. These efficiencies can be specified in the following way:
+
+<<effizienzen synta, eval=FALSE, echo=TRUE>>=
+params$efficiencies       = c("Gene1"=1.9, "Gene2"=2, ...)
+@
+
+\noindent where \Robject{"Gene1"} represents the gene and \Robject{1.9} the efficience which
+is used for this gene
+
+\noindent If you use efficiencies, only the raw Ct value and the final 'level' is
+calculated. There are no 'dCt' or 'ddCt' values. Hence no t-test can
+be performed if efficiencies are used. In this example we do not use efficiencies.
+
+<<effizienzen>>=
+#params$efficiencies       = c("Gene A"=1.9,"Gene B"=1.8,"HK1"=2,"Gene C"=2,"HK2"=2)
+#params$efficienciesError  = c("Gene A"=0.01,"Gene B"=0.1,"HK1"=0.05,"Gene C"=0.01,"HK2"=0.2)
+@
+
+%--------------------------------
+\subsection{Plot parameter (optional)}
+%--------------------------------
+
+The following parameters are used to change the final plot. First you have to
+specify what you want to plot. Here you can specify either or both of the
+following two choices:
+\begin{itemize}
+\item level - For each gene and sample the relative expression to the reference
+line is plotted
+\item Ct - the raw, unnormalized but merged Ct values are plotted
+\end{itemize}
+
+<<PlotMode>>=
+params$plotMode = c("level","Ct")
+@
+
+
+There may be cases where experiments want to exlcude certain gene
+and/or sample in the plot. Or sometimes one merely wants to plot a
+small fraction of genes and/or samples. One could set options in the
+parameter. For example the following example excludes the "NTC" sample
+in the plot:
+
+<<remaining>>=
+#REMAIN
+params$genesRemainInOutput   = NULL
+params$samplesRemainInOutput = NULL
+#NOT
+params$genesNotInOutput   = NULL
+params$samplesNotInOutput = NULL
+@
+
+Do you want the final plot to be drawn in a way such that the samples are plotted next to
+each other ? 
+
+<<grouping>>=
+params$groupingBySamples = FALSE
+@
+
+\noindent set the variable \Robject{plotPerObject} to FALSE if one
+does not need one plot for each pair.
+
+<<plot0>>=
+params$plotPerObject = TRUE
+@
+
+
+\noindent This is often useful if you have
+many genes or samples. Depending on the parameter \Robject{groupingBySamples} either
+each gene (\Robject{groupingBySamples}=\Robject{TRUE}) will have its own plot, or each sample 
+(\Robject{groupingBySamples}=\Robject{FALSE}) will have its own plot.
+
+
+If you have a single plot for each individual gene, then you may color the
+sample bars according to one parameter of your sample annotation file (if you
+have specified such a file in the beginning of this script). You may also specify
+the colors (maybe with the help of \Rpackage{RColorBrewer}).
+
+<<plot1>>=
+#params$groupingForPlot = NULL
+#params$groupingColor   = c("#E41A1C","#377EB8","#4DAF4A","#984EA3","#FF7F00")
+@
+%
+%
+You may specify a \Robject{cutoff} for the y axis for all plots. Then all plots have the
+same scale. 
+<<plot2>>=
+#params$cutoff = NULL
+@
+
+With the parameter \Robject{brewerColor} you can specify color sets you want to use in order to
+color the individual bars. For additional information have a look at the
+description of the \Robject{RColorBrewer} package.
+
+<<plot3>>=
+#params$brewerColor = c("Set3","Set1","Accent","Dark2","Spectral","PuOr","BrBG")
+@
+
+Set \Robject{legende} as \Robject{TRUE} in case you want the legend
+along the plot. Sometimes the
+plot will be messed up if the legend is plotted, so please have a try.
+
+<<plot4>>=
+params$legende  = TRUE
+@
+
+%--------------------------------
+\subsection{t-test and Wilcoxon test  specification (optional)}
+%--------------------------------
+
+You may perform either \emph{t--test} or \emph{Wilcoxon test} if you have specified a sample
+annotation file above. {\bf Attention:} The \emph{t--test} and \emph{Wilcoxon test} will not work if efficiencies are used for
+the calculation.
+<<ttest1>>=
+params$ttestPerform = FALSE
+@
+
+
+If you want to do a \emph{t--test/Wilcoxon test}, you have to specify the name of the
+column of your sample information file that includes the group information needed for the tests. If there are
+more than two groups in this column, tests for each possible pair of groups
+are performed.
+
+<<ttest>>=
+#params$ttestCol = NULL
+@
+
+If you want to perform a paired \emph{t--test/Wilcoxon test}, you have to specify a column of your
+sample information file that contains information describing the pairing of
+the samples. A pair of samples must have the same number/parameter in that
+column. Please have a look at the example.
+
+<<ttest3>>=
+#params$pairsCol = NULL
+@
+
+You can specify whether you want to exclude some samples 
+from the t-test. Here we again want to exclude the 'NTC' sample.
+<<ttest4>>=
+#params$samplesRemainInTTest	 = NULL
+#params$samplesNotInTTest	 = NULL
+@
+
+%------------------------------------------
+\subsection{Housekeeping gene correlation (optional)}
+%------------------------------------------
+
+If more than one housekeeping gene is used, the correlation
+(\emph{Pearson} or \emph{Spearman}) for each pair is calculated,
+together with a correlation plot. You may specify some samples that are not supposed to be used for
+the correlation calculation, for example negative control. In the default
+setting those samples are excluded that are also excluded from the plot.
+
+<<correlation>>=
+#params$samplesRemainInCor = NULL
+#params$samplesNotInCor    = NULL
+@
+
+%------------------------------------------
+\subsection{Execution}
+%------------------------------------------
+
+\noindent Now all parameters have been set and you can pass them to the ddCtExec function
+
+<<execute ddct>>=
+ddCtExec(params)
+@
+
+\noindent At last all you have to do is to start R, change the directory if you like, and then type the following:
+
+<<Sweave, eval=FALSE, echo=TRUE>>=
+Sweave("rtPCR-usage.Rnw")
+@
+
+\noindent The output is stored in a directory called Result\_YOU\_INPUT\_FILENAMES
+
+
+\section{Results}
+
+Various files are created during the calculation process. The most important
+files are the following:
+\begin{itemize}
+\item A tab-delimited text file containing all calculated values for each gene/sample combination,
+e.g. Ct+error, dCt+error, ddCt+error, level+error. {\bf Name of
+the file:} 'allValues' followed by the name of the file containing the
+individual Ct values and extension.
+\item A .pdf file including the plots, either of the 'levels' or the raw Ct values (depending on your choice)
+{\bf Name of the file:} 'Level' or 'Ct' followed by 'Result', the name of the
+file containing the individual Ct values and the extension. In this example the name is 'LevelResultTest.pdf'.
+\item A tab-delimited text file containing the level and the error of the
+level. This file can be used in Excel to create own plots with error
+bars. {\bf Name of the file:} 'LevelPlusError' followed by the name of the
+file containing the individual Ct values and  extension.
+\item A tab-delimited text file containing the results from the t-test and the
+Wilcoxon test (if these tests have been performed). {\bf Name of the file:} 'ttest'
+followed by the name of the groups used in the test, followed by the name of
+the file containing the individual Ct values and extension. In this example we have: 'ttestG1G2Test.txt'.
+\item An R object containing all calculated values for each gene/sample combination, e.g. Ct+error,
+dCt+error, ddCt+error, level+error. Furthermore the object includes additional sample information.  {\bf Name of
+the file:} 'Result' followed by the name of the file containing the individual
+Ct values and extension. 
+
+\end{itemize}
+There are additional tab-delimited text files and .html files containing
+'Ct','dCt', 'ddCt' and 'level' information. All this information is also
+included in the  'allValues' file, but in a different format.
+
+% The result of the housekeeping correlation calculation. One plot for each pair
+% of housekeeping genes. This plots appear only if you have more than one
+% housekeeping gene.
+
+%
+%  ----------------------------------------------------------------------------
+%
+
+\newpage
+
+\section{Session Info}
+The script has been running in the following session:
+
+<<End of session, results=tex, echo=FALSE>>=
+toLatex(sessionInfo())
+@
+
+\end{document}

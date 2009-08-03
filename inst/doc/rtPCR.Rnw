@@ -1,0 +1,345 @@
+%\VignetteIndexEntry{Introduction to the ddCt method for qRT-PCR data analysis: background, algorithm and example}
+%\VignetteDepends{Biobase,ddCt,lattice}
+%\VignetteKeywords{RT-PCR,ddCt,algorithm,statistics,visualization}
+%\VignettePackage{ddCt}
+\documentclass[11pt]{article}
+
+\usepackage{times}
+\usepackage{hyperref}
+\usepackage{listings}
+\usepackage{geometry}
+\usepackage{longtable}
+\usepackage[pdftex]{graphicx}
+\SweaveOpts{keep.source=TRUE,eps=FALSE,pdf=TRUE,prefix=FALSE} 
+
+\usepackage{natbib}
+\usepackage{times}
+
+%\textwidth=6.2in
+%\textheight=8.5in
+%\parskip=.3cm
+%\oddsidemargin=.1in
+%\evensidemargin=.1in
+%\headheight=-.3in
+
+\newcommand{\todo}[2]{\textit{\textbf{To do:} (#1) #2}}
+\newcommand{\fixme}[2]{\textit{\textbf{FIXME:} (#1) #2}}
+\newcommand{\scscst}{\scriptscriptstyle}
+\newcommand{\scst}{\scriptstyle}
+\newcommand{\R}[1]{{\textsf{#1}}}
+\newcommand{\Rfunction}[1]{{\texttt{#1}}}
+\newcommand{\Robject}[1]{{\texttt{#1}}}
+\newcommand{\Rpackage}[1]{{\textit{#1}}}
+\newcommand{\Rclass}[1]{{\textit{#1}}}
+\newcommand{\Metas}[1]{{\texttt{#1}}}
+\newcommand{\myincfig}[3]{%
+  \begin{figure}[htbp]
+    \begin{center}
+      \includegraphics[width=#2]{#1}
+      \caption{\label{#1}#3}
+    \end{center}
+  \end{figure}
+}
+
+\def\TReg{\textsuperscript{\textregistered}}
+\def\TCop{\textsuperscript{\textcopyright}}
+\def\TTra{\textsuperscript{\texttrademark}}
+\def\Ct{$C_T$ }
+\def\dCt{$dC_T$ }
+\def\ddCt{$ddC_T$ }
+
+\bibliographystyle{plain}
+
+\begin{document}
+\title{ddCt method for qRT--PCR data analysis}
+\author{Jitao David Zhang, Markus Ruschhaupt and Rudolf Biczok}
+\maketitle
+
+\begin{abstract}
+Here we describe the $2^{-\Delta \Delta
+    C_{T}}$ algorithm implemented in the
+    \Rpackage{ddCt} package. The package is designed for the data analysis of quantitative
+    real--time PCR (qRT--PCR) experiemtns in \R{Bioconductor}. With
+    the \Rpackage{ddCt} package, one can acquire the relative
+    expression of the target gene in different samples. This vignette
+    mainly dicusses the principles of the ddCt algorithm and
+    demonstrates the functionality of the package with a compact
+    example. Another vignette in the package, \emph{rtPCR-usage},
+    gives instructions to call the script for end--to--end analysis.
+\end{abstract}
+
+Both absolute and relative quantification have been used to analyse the data from the
+quantitative real--time PCR (qRT--PCR, or RT--PCR for short)
+experiments. The $2^{-\Delta \Delta C_{T}}$ algorithm, also known as
+the the \emph{delta-delta-Ct} or \emph{ddCt}
+algorithm, is a convenient method to analyze the relative changes in
+gene expression~\cite{Livak2001402}. It requires the assignment of
+one or more housekeeping genes, which are assumed to be uniformly and
+constantly expressed in all samples, as well as one or more reference
+samples. The expression of other samples is then compared to that in
+the reference sample\footnote{The \Rpackage{qpcrNorm} package in the
+  \R{Bioconductor} repository introduces the data--driven normalization method for
+  high--throughput qPCR data, which does not depend on the
+  house--keeping genes but makes extra assumptions. See the help pages
+and the vignette of the \Rpackage{qpcrNorm} package for further information}. 
+
+\section{RT--PCR}\label{sec:principle}
+Rich background knowledge about RT--PCR can be found
+at~\cite{rtPCRtutorial}, ~\cite{rtPCRambion} and ~\cite{rtPCRtaqman}. There are many
+variations in the experimental processes. Here we shortly
+summarize the general key steps in the TaqMan\TReg assay to help the understanding of following discussions.
+\begin{enumerate}
+\item RNA preparation: total or specific type of RNA are extracted
+  from cell lines, tissues, biopsies, etc.
+\item RNA is Reversed Transcribed into DNA, which is also known as the
+  \emph{RT-reaction}.
+\item qPCR probes (sometimes also known as 'primers') are added to the transcribed cDNA sample and the
+  polymerase chain reaction takes place. This probe is an oligonucleotide with a reporter
+  dye attached to the 5' end and a quencher dye attached to the 3'
+  end. Till the time the probe is not hydrolized, the quencher and the
+  fluorophore remain in proximity to each other, which does not completely
+  quench the flourescence of the reporter dye and therefore only a background
+  flourescence is observed.
+\item During PCR, the probe anneals specifically
+  between the forward and reverse primer to an internal region of the
+  PCR product. The polymerase then carries out the extension of the
+  primer and replicates the template to which the TaqMan\TReg is
+  bound. The 5' exonuclease activity of the polymerase cleaves the
+  probe, releasing the reporter molecule away from the close vicinity
+  of the quencher. The fluorescence intensity of the reporter dye, as
+  a result increases. This process repeats in every cycle.
+\item As the cycle number increases, the detected fluorescence also
+  increases. And when the fluorescence crosses an arbitrary line, the
+  device recodes the cycle number until then, which is known as the
+  \Ct value.
+\end{enumerate}
+In princple one could also report the \Ct values of the housekeeping
+gene and the sample gene(s) in the form of barplots to show their relative relation. However,
+this has two main drawbacks:
+\begin{itemize}
+\item This is only applicable in cases where more than one genes are
+  compared in the same sample. In case of mutilple samples one has to
+  calculate the relative expression to a specified \emph{reference sample}
+\item \Ct value is exponential. In case of a ideal amplification efficiency of $1$, increase of
+  the \Ct value by $1$ indicates a two--fold expression. Therefore, it
+  maybe misleading to illustrate the expression with the raw \Ct value.
+\end{itemize}
+
+
+\section{The \emph{ddCt} Algorithm}
+The \emph{ddCt} method was one of the first methods used to to calculate
+real--time PCR results. Different the standard curve ~\cite{rtPCRtutorial} and the Pfaffl method~\cite{Pfaffl2001},
+\emph{ddCt} is an approximation method and makes various
+assumptions. However, it reduces lot of experiment effort by making
+these assumptions and is easy to implement, and in many cases they
+return results similarly to other non-approximation methods~\cite{Livak2001402}.
+
+\subsection{Deviation}
+The exponential amplification of the polymerase chain reaction (PCR)
+can be described by the equation~\ref{eq:expAmp}.
+\begin{equation}
+X_n = X_0 \times (1 + E_X)^n
+\label{eq:expAmp}
+\end{equation}
+\noindent where $X_n$ is the number of target molecules at cycle $n$ of the
+reaction, and $X_0$ is the number of target molecules initially. $E_x$
+is the amplification efficiency of target amplification, and $n$ is
+the number of cycles. The threshold value (\Ct) records the fractional
+cycle number at which the fluorescence reaches a fixed threshold (see
+section~\ref{sec:principle}). Therefore
+\begin{equation}
+X_T = X_0 \times (1 + E_X)^{C_{T,X}} = K_X
+\label{eq:thr}
+\end{equation}
+\noindent where $X_T$ is the threshold number of target molecules, $C_{T,X}$ is
+the readout \Ct value, and $K_X$ is a constant. Similarly we can
+express the equation~\ref{eq:thr} for the endogenous reference gene
+(house-keeping genes) as
+\begin{equation}
+R_T = T_0 \times (1 + E_R)^{C_{T,R}} = K_R
+\label{eq:thrHKG}
+\end{equation}
+\noindent where $R_T$ is the threshold number of the reference
+molecules, $R_0$ is the initial number of reference molecules. $E_R$
+is the efficiency of reference amplification, $C_{T,R}$ is the \Ct
+readout for the reference, and $K_R$ is a constant.
+
+Combining equation~\ref{eq:thr} and \ref{eq:thrHKG} we get
+\begin{equation}
+  \frac{X_T}{R_T} = \frac{X_0 \times (1 + E_X)^{C_{T,X}}}{R_0 \times (1 + E_R)^{C_{T,R}}}
+		  = \frac{K_X}{K_R} = K
+\label{eq:XDivR}
+\end{equation}
+
+For qRT--PCR using TaqMan\TReg probes, the exact values of $X_T$ and
+$R_T$ depend on several factors including the chemistry of reporter
+dye, the sequence context effects on the fluorescence properties of
+the probe, the fficiency of probe cleavage, purity of the probe, and
+the setting of the fluorescence
+threshold~\cite{Livak2001402}. Therefor, the constant $K$ does not have
+to be equal to one. 
+
+Assuming efficiencies of the target and the reference are the same,
+\begin{eqnarray}
+  E_X = E_R = E \nonumber \\
+ \frac{X_0}{R_0} \times (1 + E)^{C_{T,X}-C_{T,R}} = K
+\end{eqnarray}
+
+\noindent or
+\begin{eqnarray}
+  X_N \times (1 + E)^{\Delta C_T} = K
+\label{eq:deltaCt}
+\end{eqnarray}
+
+\noindent where $X_N$ is equal to the \emph{normalized} amount of
+target ($X_0/R_0$) and the \dCt is equal to the difference in the \Ct
+for target and reference ($C_{T,X}-C_{T,R}$).
+
+Equation~\ref{eq:deltaCt} can be rearranged as
+\begin{equation}
+  X_N = K \times (1 + E)^{-\Delta C_T}
+\label{eq:deltaCtRe}
+\end{equation}
+
+The final step is to divide the $X_N$ in the
+equation~\ref{eq:deltaCtRe} for any sample $q$ by the reference sample
+(also known as the calibrator, \emph{cb}):
+\begin{equation}
+  \frac{X_{N,q}}{X_{N,cb}} = \frac{K \times (1 + E)^{-\Delta C_{T,q}}}{K \times (1 + E)^{-\Delta C_{T,cb}}}
+			   = (1 + E)^{-\Delta \Delta C_T}
+\end{equation}
+\noindent Here $-\Delta \Delta C_T = -(\Delta C_{T,q} - \Delta C_{T,cb})$.
+
+For amplicons designed to be less than 150 basepairs and for which the
+primer and $Mg^{2+}$ concentration have been optimized, the efficiency
+$E$ is close to one. Therefore, the amount of target, normalized to
+the endogenous reference and relative to a reference sample, is given by
+\begin{equation}
+  \mbox{amount of target} = 2^{-\Delta \Delta C_T}
+\end{equation}
+
+\textbf{Attention:} Note that for the \ddCt calculation to be valid, the amplification
+efficiencies of the target and reference must be approximately equal.
+
+
+\section{Application example}
+Here we show how to use the \Rpackage{ddCt} package by a short example.
+
+\subsection{File I/O setup}
+We have attached two SDS output files, 'Experiment1.txt' and
+'Experiment2.txt', in the package directory. The sample annotation
+information is also provided as the tab-delimited text file
+'sampleData.txt'. Any warning information (for example
+\emph{Undetermined} in reference sample) is saved as
+a text file specified by the parameter 'warningFile'.
+
+<<specifyFiles,results=hide>>=
+library(ddCt)
+datadir <- function(x) system.file("extdata", x, package="ddCt")
+savedir <- function(x) file.path(tempdir(), x)
+
+file.names <- c(datadir("Experiment1.txt"),datadir("Experiment2.txt"))
+info <- datadir("sampleData.txt")
+warningFile <- savedir("warning.output.txt")
+@
+
+\subsection{Reference sample and housekeeping gene}
+For the sake of simplicity, we choose \textbf{Sample1} and
+\textbf{Sample2} as reference samples (calibrators), and
+\textbf{Gene2} as the reference
+gene (housekeeping gene) respectively. This could happen, for example,
+if the \textbf{Sample1} and \textbf{Sample2} are untreated samples
+while the \textbf{Sample3} has been treated with certain drugs. And
+\textbf{Gene2} is a housekeeping gene which we assume is expressed
+constantly in all the samples. 
+
+<<readingData>>=
+name.reference.sample <- c("Sample1", "Sample2")
+name.reference.gene <- c("Gene2")
+@
+
+Note that more than one reference sample or renference gene can be specified.
+
+\subsection{Read in data}
+\Rfunction{SDMFrame} function is called to read in experiment
+data.Optionally one could also read in the sample annotation, which is the
+\Robject{sampleInformation} object in the example.
+<<readData,results=hide>>=
+library(Biobase)  
+CtData <- SDMFrame(file.names)
+sampleInformation <- read.AnnotatedDataFrame(info,header=TRUE, row.names=NULL)
+@
+Note that \Rfunction{SDMFrame} is able to accept one or more files as input.
+
+\subsection{Apply the \emph{ddCt} method}
+Next step we call \Rfunction{ddCtExpression} to perform \emph{ddCt} method on
+the data.
+
+<<calculating>>=
+result <- ddCtExpression(CtData,
+                         calibrationSample=name.reference.sample,
+                         housekeepingGene=name.reference.gene,
+                         sampleInformation=sampleInformation)
+@
+
+Please refer to the help page of \Robject{ddCtExpression-class} for
+the methods to access all the values calculated by the \emph{ddCt} method. For
+example the error (either standard deviation or median absolute deviation) of all replicates are
+accessible through
+
+<<showMAD>>=
+CtErr(result)
+@
+
+\subsection{Visualization}
+\Rfunction{errBarchart} provides a simple way to visualize the
+experiment results with the modified \Rfunction{barchart} from the
+\Rpackage{lattice} package, as seen in the figure~\ref{fig:errbarchart}
+
+\begin{figure}[htbp]
+\begin{center}
+<<vis, fig=TRUE>>=
+br <- errBarchart(result)
+print(br)
+@ 
+\caption{Barchart with error bars to visualize the expression fold
+  change of target genes in samples. Each panel represents one target
+  gene (Gene 1, 2 and 3 in this case), and the expression level in
+  each sample is indicated by the height of bars. If one gene is not
+  detected in one sample, a 'NA' symbol in grey will appear in the
+  position of the bar (Gene3 in Sample4), which helps
+  to differ from the situations where the expression is very low but
+  not yet undetectable (for instance Gene3 in Sample3). See the help
+  page of \Rfunction{errBarchart} for more details.}
+\label{fig:errbarchart}
+\end{center}
+\end{figure}
+
+\subsection{Write result to text file}
+Finally we can save the results as tab-delimited text files.
+<<write Tables>>=
+elistWrite(result,file=savedir("allValues.txt"))
+@
+
+\section{Acknowledgement}
+We thank Florian Hahne, Wolfgang Huber, Andreas Buness and Stefan Wiemann for their
+suggestion and comments during the development of the
+package. The example data has been kindly provided by Ute Ernst and was
+produced in the Division of Molecular Genome Analysis, DKFZ
+Heidelberg, Germany.
+
+\newpage
+
+\section{Session Info}
+The script has been running in the following session:
+<<sessionInfo, results=tex, echo=FALSE>>=
+toLatex(sessionInfo(), locale=FALSE)
+@ 
+\bibliography{rtPCR}{}
+
+\end{document}
+
+
+
+
+
