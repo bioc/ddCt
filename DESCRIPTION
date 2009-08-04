@@ -1,9 +1,9 @@
 Package: ddCt
-Title: Performing the ddCt method for taqman data
-Version: 0.99.0
-Date: 2009-07-26
+Title: The ddCt Algorithm for the Analysis of Quantitative Real-Time PCR (qRT-PCR)
+Version: 0.99.1
+Date: 2009-08-04
 Author: Rudolf Biczok, Markus Ruschhaupt and Jitao David Zhang
-Description: This package includes a functions to perform the ddCt method for TaqMan data
+Description: The Delta-Delta-Ct(ddCt) Algorithm is an approximation method to determine relative gene expression with quantitative real-time PCR (qRT-PCR) experiments. Compared to other approaches, it requires no standard curve for each primer-target pair, therefore reducing the working load and yet returning accurate enough results as long as the assumptions of the amplification efficiency hold. The ddCt package implements a pipeline to collect, analyse and visualize qRT-PCR results, for example those from TaqMan SDM software, mainly using the ddCt method. The pipeline can be either invoked by a script in command-line or through the API consisting of S4-Classes, methods and functions. 
 Maintainer: Jitao David Zhang <j.zhang@dkfz.de>
 License: LGPL-3
 Depends: R (>= 2.3.0), Biobase (>= 1.10.0), RColorBrewer (>= 0.1-3), xtable, lattice, methods
