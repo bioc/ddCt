@@ -18,8 +18,6 @@
 \alias{uniqueSampleNames,SDMFrame-method}
 \alias{coreData,SDMFrame-method}
 \alias{coreData<-,SDMFrame-method}
-\alias{withoutPath,SDMFrame-method}
-\alias{withoutPath<-,SDMFrame-method}
 \alias{show,SDMFrame-method}
 
 %% currently SDMFrame only
@@ -50,10 +48,6 @@
     }
     \item{\code{files}:}{Object of class \code{"character"} contains the
       source SDM files
-    }
-    \item{\code{withoutPath}:}{Object of class \code{"logical"}  if
-      \code{TRUE}, the path to the files isstripped from the
-      \code{filename} column of the resulting data frame
     }
   }
 }
@@ -115,12 +109,6 @@
     }
     \item{coreData<-}{\code{signature(object="SDMFrame")}: replace the
       data frame read from SDM file. Internal method
-    }
-    \item{withoutPath}{\code{signature(object="SDMFrame")}: returns the
-      logical value whether file names include path. Internal method
-    }
-    \item{withoutPath<-}{\code{signature(object="SDMFrame")}: replaces the
-      logical value whether file names include path. Internal method
     }
   }
 }

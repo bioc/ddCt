@@ -23,7 +23,6 @@ test.SDMFrame.initialize <- function()
 {
   sdm <- SDMFrame(system.file("extdata", "Experiment1.txt", package="ddCt"))
   checkEquals(sdm@coreData, test.SDMFrame.data.sdm@coreData)
-  checkEquals(sdm@withoutPath, test.SDMFrame.data.sdm@withoutPath)
 }
 
 test.SDMFrame.ddCtExpression <- function() {

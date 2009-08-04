@@ -110,9 +110,8 @@ setMethod("numberNA", "ddCtExpression", function(object) {
 ## constructor for parameter initialisation
 ##----------------------------------------##
 setMethod("initialize", "SDMFrame",
-          function(.Object, files, withoutPath) {
+          function(.Object, files) {
             .Object@files <- files
-            .Object@withoutPath <- withoutPath
             .Object@coreData <- readCoreData(.Object)
             
             return(.Object)
@@ -123,10 +122,6 @@ setMethod("initialize", "SDMFrame",
 ##----------------------------------------##
 setMethod("coreData", "SDMFrame", function(object) {
   return(object@coreData)
-})
-
-setMethod("withoutPath", "SDMFrame", function(object) {
-  return(object@withoutPath)
 })
 
 setMethod("fileNames", "SDMFrame", function(object) {
@@ -178,11 +173,6 @@ setReplaceMethod("detectorNames", signature(object="SDMFrame",value="character")
 
 setReplaceMethod("coreData", c("SDMFrame","data.frame"), function(object, value) {
   object@coreData <- value
-  return(object)
-})
-
-setReplaceMethod("withoutPath", c("SDMFrame", "logical"), function(object, value) {
-  object@withoutPath <- value
   return(object)
 })
 
@@ -239,7 +229,7 @@ setMethod("ddCtExpression", "SDMFrame",
             if(missing(algorithm))
               algorithm="ddCt"
             if(missing(warningStream))
-              warningStream =" warning.output.txt"
+              warningStream = "warnings.txt"
             if(missing(type))
               type="mean"
             if(missing(toZero))
@@ -288,8 +278,7 @@ setMethod("readCoreData", "SDMFrame", function(object) {
           w <- read.table(file.name,sep="\t",nrows=number.of.rows,skip=number.of.skips,header=TRUE,as.is=TRUE, blank.lines.skip = TRUE, comment.char="")
           if (! all (c("Ct","Detector","Sample")%in% colnames(w))) stop("Your file does not contain the columns 'Ct','Detector' and 'Sample.")
           w <- w[,c("Sample","Detector","Ct")]
-          if (object@withoutPath){a <- unlist(strsplit(file.name,"/")); file.name <- a[length(a)]}
-          Platename <- rep(file.name, nrow(w))
+          Platename <- rep(basename(file.name), nrow(w))
           Ctvalues <- rbind(Ctvalues,cbind(w,Platename))
 	}
 	ow <- getOption("warn")
@@ -713,11 +702,6 @@ setMethod("show", "SDMFrame", function(object) {
                        "File: %s", "Files: %s"),
               paste(sQuote(object@files), collapse=", ")), "\n")
 
-  ## withoutPath
-  cat(paste("Note: file", ngettext(nfiles, "name", "names"),
-      ifelse(withoutPath(object), ngettext(nfiles, "does not include", "do not include"),
-             ngettext(nfiles, "includes", "include")),
-             "path", "\n", sep=" "))
 })
 ################################################################################
 ## Class ddCtParam

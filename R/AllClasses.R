@@ -24,7 +24,10 @@ setClass("ddCtExpression",
 ##     columns: Sample, Detector, Ct and Platename. (case senstive)
 ################################################################################
  
-setClass("SDMFrame",representation(coreData="data.frame",files="character",withoutPath="logical"))
+setClass("SDMFrame",
+         representation(coreData="data.frame",
+                        files="character")
+         )
 
 ################################################################################
 ## Class ddCtParam

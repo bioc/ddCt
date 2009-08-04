@@ -42,13 +42,13 @@ replaceNames <- function(oldName ,targetName, newName) {
 ### alias functions
 ################################################################################
 
-SDMFrame <- function(files, withoutPath=TRUE) {
-  return(new("SDMFrame",file=files, withoutPath=withoutPath));
+SDMFrame <- function(files) {
+  return(new("SDMFrame",file=files));
 }
 
-readSDM <- function(files, withoutPath=TRUE) {
+readSDM <- function(files) {
   .Deprecated("SDMFrame",package="ddCt");
-  return(SDMFrame(file=files, withoutPath=withoutPath))
+  return(SDMFrame(file=files))
 }
 
 ################################################################################

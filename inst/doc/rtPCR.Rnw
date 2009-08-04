@@ -240,7 +240,7 @@ savedir <- function(x) file.path(tempdir(), x)
 
 file.names <- c(datadir("Experiment1.txt"),datadir("Experiment2.txt"))
 info <- datadir("sampleData.txt")
-warningFile <- savedir("warning.output.txt")
+warningFile <- savedir("warnings.txt")
 @
 
 \subsection{Reference sample and housekeeping gene}
@@ -279,7 +279,8 @@ the data.
 result <- ddCtExpression(CtData,
                          calibrationSample=name.reference.sample,
                          housekeepingGene=name.reference.gene,
-                         sampleInformation=sampleInformation)
+                         sampleInformation=sampleInformation,
+                         warningStream=warningFile)
 @
 
 Please refer to the help page of \Robject{ddCtExpression-class} for

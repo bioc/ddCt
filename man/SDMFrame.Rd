@@ -4,13 +4,11 @@
 \title{Read an SDM file}
 \description{Read an SDM file: Data Output File for SDS, Version 2.1}
 \usage{
-  SDMFrame(files, withoutPath=TRUE)
-  readSDM(files, withoutPath=TRUE)
+  SDMFrame(files)
+  readSDM(files)
 }
 \arguments{
   \item{files}{Character vector of filenames}
-  \item{withoutPath}{logical - if \code{TRUE}, the path to the files is
-    stripped from the \code{filename} column of the resulting data frame.} 
 }
 
 \details{This function reads the data given in the colums
@@ -18,7 +16,7 @@
   stores them as a data.frame. An additional column including the
   respective filename is added.
 
-  this function is a wrapper for the SDMFrame constructor
+  This function is a wrapper for the SDMFrame constructor
 }
 
 \value{A object of class \code{\linkS4class{SDMFrame}}}

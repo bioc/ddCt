@@ -57,6 +57,4 @@ setGeneric("ddCtWithEExec",function(object, calibrationSample, housekeepingGenes
 setGeneric("readCoreData",function(object) standardGeneric("readCoreData"))
 setGeneric("coreData", function(object) standardGeneric("coreData"))
 setGeneric("coreData<-", function(object, value) standardGeneric("coreData<-"))
-setGeneric("withoutPath", function(object) standardGeneric("withoutPath"))
-setGeneric("withoutPath<-", function(object, value) standardGeneric("withoutPath<-"))
 setGeneric("headtailPrint", function(object,...) standardGeneric("headtailPrint"))
