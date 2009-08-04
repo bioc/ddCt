@@ -40,15 +40,20 @@ export(
                ddCtErr,
                numberCt,
                numberNA,
-               detectorNames,
                ddCtExpression,
-               "detectorNames<-",
-               errBarchart,
-               fileNames,
-               sampleNames,
-               "sampleNames<-",
-               uniqueDetectorNames,
-               "uniqueDetectorNames<-",
-               uniqueSampleNames,
-               "uniqueSampleNames<-"
+               errBarchart
                )
+
+## mainly for SDMFrame
+exportMethods(coreData,
+              "coreData<-",
+              rightCensoring,
+              fileNames,
+              sampleNames,
+              "sampleNames<-",
+              uniqueDetectorNames,
+              "uniqueDetectorNames<-",
+              uniqueSampleNames,
+              "uniqueSampleNames<-",
+              "detectorNames<-",
+              detectorNames)

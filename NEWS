@@ -1,6 +1,17 @@
-Release 0.99.2 (2009-09-04)
+Release 0.99.3 (2009-08-04)
+New feature
+    + 'rightCensoring' method is added. It performs the right censoring of the
+    Ct value and sets those values above a given threshold as NA or other given
+    value 
+API Changes
+    + 'coreData' and 'coreData<-' methods are exported now for the SDMFrame-class
+
+Release 0.99.2 (2009-08-04)
 API Changes
     + 'withoutPath' slot is removed from the 'SDMFrame' class.
 Bug Fixes
-    + 'warningStream' parameter is really passed in the 'ddCtExpression' function. This parameter was neglected in the older version.
+    + 'warningStream' parameter is really passed in the 'ddCtExpression'
+    function. This parameter was neglected in the older version. 
+
+
 

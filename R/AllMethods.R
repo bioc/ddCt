@@ -211,6 +211,20 @@ setReplaceMethod("uniqueSampleNames", signature(object="SDMFrame",target="missin
                  })
 
 ##----------------------------------------##
+## censoring
+##----------------------------------------##
+setMethod("rightCensoring", signature(object="SDMFrame", threshold="numeric"),
+          function(object, threshold, value) {
+            if(missing(value))
+              value <- as.numeric(NA)
+            cData <- coreData(object)
+            cData$Ct[cData$Ct > threshold] <- value
+            coreData(object) <- cData
+            return(object)
+          })
+                                      
+
+##----------------------------------------##
 ## ddCtExpression public user method
 ##----------------------------------------##
 

@@ -17,7 +17,7 @@
 \alias{uniqueSampleNames<-,SDMFrame,missing,character-method}
 \alias{uniqueSampleNames,SDMFrame-method}
 \alias{coreData,SDMFrame-method}
-\alias{coreData<-,SDMFrame-method}
+\alias{coreData<-,SDMFrame,data.frame-method}
 \alias{show,SDMFrame-method}
 
 %% currently SDMFrame only
@@ -30,6 +30,10 @@
 \alias{uniqueDetectorNames}
 \alias{uniqueSampleNames<-}
 \alias{uniqueSampleNames}
+\alias{coreData}
+\alias{coreData<-}
+\alias{rightCensoring}
+\alias{rightCensoring,SDMFrame,numeric-method}
 
 \title{Working with SDM files}
 \description{ The class SDMFrame provides core functionalities to read
@@ -104,11 +108,20 @@
     \item{show}{\code{signature(object="SDMFrame")}: pretty print of the
       SDMFrame instance
     }
+    \item{rightCensoring}{\code{signature(object="SDMFrame",
+	threshold="numeric")}: Right censoring the Ct value,  which
+      targets the data points above a certain value
+      (\code{threshold}). High Ct values (higher than 40 or 45 by the rule
+      of thumb) are often not accurate and may indicate too weak
+      expression. The function performs the right censoring on the data and
+      set the value above the threshold as \code{NA} (by default) or a
+      given value. See the example.
+    }
     \item{coreData}{\code{signature(object="SDMFrame")}: returns the
-      data frame read from SDM file. Internal method
+      data frame read from SDM file.
     }
     \item{coreData<-}{\code{signature(object="SDMFrame")}: replace the
-      data frame read from SDM file. Internal method
+      data frame read from SDM file.
     }
   }
 }
@@ -127,10 +140,6 @@ sampdat <- SDMFrame(system.file("extdata", "Experiment1.txt",
 ## sampdat <- new("SDMFrame",system.file("extdata", "Experiment1.txt",
 ##                                       package="ddCt"))
 
-## or with
-## sampdat <- readSDM(system.file("extdata", "Experiment1.txt",
-##                                package="ddCt"))
-
 ## use the getter methods
 sampleNames(sampdat)
 
@@ -148,5 +157,9 @@ uniqueSampleNames(sampdat)
 ## or use this syntax to replace the gene names
 uniqueDetectorNames(sampdat) <- c(Gene1="NewGene1", Gene2="NewGene2")
 uniqueDetectorNames(sampdat)
+
+## right censoring the data
+rightCensoring(sampdat, 35)
+rightCensoring(sampdat, 35, 35)
 }
 \keyword{classes}

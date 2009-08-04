@@ -51,6 +51,8 @@ setGeneric("fileNames",function(object) standardGeneric("fileNames"))
 
 setGeneric("ddCtExpression",function(object, warningStream, algorithm, calibrationSample, housekeepingGenes, type, sampleInformation, toZero, efficiencies, efficiencies.error) standardGeneric("ddCtExpression"))
 
+setGeneric("rightCensoring", function(object, threshold, value) standardGeneric("rightCensoring"))
+           
 ## private
 setGeneric("ddCtExec",function(object, calibrationSample, housekeepingGenes, type, sampleInformation, toZero) standardGeneric("ddCtExec"))
 setGeneric("ddCtWithEExec",function(object, calibrationSample, housekeepingGenes,  type, sampleInformation, efficiencies, efficiencies.error) standardGeneric("ddCtWithEExec"))
