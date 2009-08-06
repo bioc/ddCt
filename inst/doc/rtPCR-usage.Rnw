@@ -6,7 +6,7 @@
 
 \usepackage{times}
 \usepackage{hyperref}
-\usepackage{listings}
+%\usepackage{listings} %% windows server does not have listings
 \usepackage{geometry}
 \usepackage{longtable}
 \usepackage[pdftex]{graphicx}
@@ -161,10 +161,12 @@ line\footnote{The examples shown here are for \R{Debian Linux} system,
 on the windows system the path separator has to be modified, however
 the functionality is the same}:
 
-\lstset{language=sh}
-\begin{lstlisting}
+%\lstset{language=sh}
+%\begin{lstlisting}
+\begin{verbatim}
 Rscript PKG_DIR/scripts/ddCt.R -inputFile="PKG_DIR/extdata/Experiment1.txt" ....
-\end{lstlisting}
+\end{verbatim}
+%\end{lstlisting}
 
 This command-line approach does not need to invoke a R session and is
 easy to be built into automatic analysis pipelines. It is however hard
@@ -350,10 +352,12 @@ used for the parameters in the settings below.
 
 \noindent In the commald-line you can set sutch a parameter in this way:
 
-\lstset{language=sh}
-\begin{lstlisting}
+%\lstset{language=sh}
+%\begin{lstlisting}
+\begin{verbatim}
 Rscript ddCt.R -geneAlias=Gene1="Gene A",Gene2="Gene B" ...
-\end{lstlisting}
+\end{verbatim}
+%\end{lstlisting}
 
 
 %--------------------------------
@@ -377,10 +381,12 @@ params$referenceSample <- c("Sample1")
 
 \noindent The comand-line version would look like this:
 
-\lstset{language=sh}
-\begin{lstlisting}
+%\lstset{language=sh}
+%\begin{lstlisting}
+\begin{verbatim}
 Rscript ddCt.R -referenceGene=Gene1,Gene2 ...
-\end{lstlisting}
+\end{verbatim}
+% \end{lstlisting}
 
 You may set a threshold to filter the $C_T$ values, which is used to set
 an upper boundary of the $C_T$ value to be considered. Any $C_T$ value above this

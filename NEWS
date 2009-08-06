@@ -1,3 +1,7 @@
+Release 0.99.4 (2009-08-06)
+Documentation
+    + Vignette uses 'verbatim' instead of 'listings' package to show script codes, since the Windows server of Bioconductor does not install the package.
+
 Release 0.99.3 (2009-08-04)
 New feature
     + 'rightCensoring' method is added. It performs the right censoring of the
