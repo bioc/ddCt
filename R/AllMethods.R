@@ -153,10 +153,28 @@ setMethod("$", "SDMFrame", function(x, name) {
 })
 
 setMethod("[", "SDMFrame", function(x, i, j, ..., drop) {
-  return(x@coreData[i=i, j=j, ..., drop=drop])
+  subCoreData <- x@coreData[i, j, ..., drop=FALSE]
+  coreData(x) <- subCoreData
+  return(x)
 })
 
-##currently dissabled
+setMethod("Ct", "SDMFrame", function(object) {
+  coreData(object)$Ct
+})
+
+## casting methods
+setAs(from="SDMFrame", to="data.frame", def=function(from) {
+  return(coreData(from))
+})
+
+### S3 method as.data.frame
+as.data.frame.SDMFrame <- function(x, row.names=NULL, optional=FALSE,...) {
+  cd <- coreData(x)
+  return(as.data.frame(cd, row.names=row.names, optional=optional,...))
+}
+
+
+##currently disabled
 ##setMethod("[[", "SDMFrame", function(x, i,j, ...,exact) {
 ##  return(x@coreData[[i=i, j=j, ..., exact=exact]])
 ##})
@@ -522,46 +540,53 @@ setMethod("ddCtExec", "SDMFrame",
  
             cts <- object$Ct
             platenames <- object$Platename
-            reducedSet <- object[,c("Sample","Detector")]
+
+            ##--------------------##
+            ## checking
+            ##--------------------##
+            type <- match.arg(type, c("median","mean"), several.ok=FALSE)
             
-            if (!all(housekeepingGenes %in% reducedSet[,2]))
-              stop("Not all of your housekeeping genes are in your table", call.=FALSE)
-            if (! all(calibrationSample %in% reducedSet[,1]))
-              stop("At least one of your reference samples is not in your table.", call.=FALSE)
-            if (! type %in% c("median","mean"))
-              stop("Type must be median or mean!", call.=FALSE)
+            ## unique detector and sample names
+            uDetNames <- uniqueDetectorNames(object)
+            uSamNames <- uniqueSampleNames(object)
+            dsPair <- coreData(object[,c("Sample","Detector")])
+
+            isHKGincluded <- all(housekeepingGenes %in% uDetNames)
+            isCALincluded <- all(calibrationSample %in% uSamNames)
+            if (!isHKGincluded) stop("Not all your housekeeping genes are in your table", call.=FALSE)
+            if (!isCALincluded) stop("Not all reference samples are not in your table.", call.=FALSE)
             
             ## NA data points
-            numberNA  <- tapply(cts,reducedSet,function(x) sum(is.na(x)))
+            numberNA  <- tapply(cts,dsPair,function(x) sum(is.na(x)))
             ## All data points
-            numberAll <- tapply(cts,reducedSet,length)
+            numberAll <- tapply(cts,dsPair,length)
             ## Effective data points
             numberEff <- numberAll - numberNA
             
             if (type=="median"){
-              Ct         <- tapply(cts,reducedSet,na.median,na.rm=TRUE)       # Median
+              Ct         <- tapply(cts,dsPair,na.median,na.rm=TRUE)       # Median
               ## ?? question: should the constant here set to 1?
-              ctMad          <- tapply(cts,reducedSet,na.mad,na.rm=TRUE,con=1)    # MAD 
+              ctMad          <- tapply(cts,dsPair,na.mad,na.rm=TRUE,con=1)    # MAD 
               CtError              <- ctMad/sqrt(numberEff)
             } else{
-              Ct         <- tapply(cts,reducedSet,na.mean,na.rm=TRUE)         # Mean
-              CtSd           <- tapply(cts,reducedSet,na.sd,na.rm=TRUE)
+              Ct         <- tapply(cts,dsPair,na.mean,na.rm=TRUE)         # Mean
+              CtSd           <- tapply(cts,dsPair,na.sd,na.rm=TRUE)
               if(toZero) CtSd[numberEff==1] <- 0             # SD 
               CtError              <- CtSd/sqrt(numberEff) # SEM 
             }
-            difference  <- tapply(cts,reducedSet,getDiff)          # ratio long distance short distance
-            plate <- tapply(platenames,reducedSet,uniquePlate)
+            difference  <- tapply(cts,dsPair,getDiff)          # ratio long distance short distance
+            plate <- tapply(platenames,dsPair,uniquePlate)
             
             
             ## warning messages if a reference sample or a housekeeping gene has no values
             for (sample in calibrationSample)
-              for( Detector in unique(reducedSet[,2])){
+              for( Detector in uDetNames){
                 if (is.na(Ct[sample,Detector]))
                   warning(paste("No value for gene",Detector,"in ref. sample",sample), call.=FALSE)
               }
             
             for (Detector in housekeepingGenes)
-              for( sample in unique(reducedSet[,1])){
+              for( sample in uSamNames){
                 if (is.na(Ct[sample,Detector]))
                   warning(paste("No value for housekeeping gene",Detector,"in sample",sample), call.=FALSE)
               }

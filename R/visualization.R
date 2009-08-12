@@ -19,9 +19,7 @@
 ## panel function for barchart with error
 panel.barchart.errbar <- function(x,y, subscripts, groups, 
                                   width.errbar=0.08, lwd.errbar=2, col.errbar="black",thr, ...) {
-
   isLevel <- 1:(length(x)/2)
-
   ## draw bar chart plot, na is replaced by 0
   y.na.tol <- y[isLevel]; y.na.tol[is.na(y.na.tol)] <- 0; y.na.tol[y.na.tol>thr] <- thr+1
   panel.barchart(x[isLevel],y.na.tol[isLevel],...)
@@ -65,15 +63,21 @@ ddCtErrBarchart <- function(x,
                             xlab="Sample",ylab="Expression fold change",
                             cols=brewer.pal(12, "Set3"),round=0, outText=TRUE, rot=45,
                             ...) {
+
+  ## if all exprs is NA, the plot will not be interpretable
+  if(all(is.na(x$exprs)))
+    stop("All expressions are NA!\n")
+  
   x$Var2 <- factor(as.character(x$Var2))
   x$Var1 <- factor(as.character(x$Var1))
-  barchart(exprs + level.err ~ Var2 | Var1, data=x,
+  barchart(exprs + level.err ~ Var2 | Var1, data=x, 
            scales=list(x=list(rot=rot), y=list(alternating=1, at=seq(0, thr, 0.5))),
            ylim=c(0, thr*1.1),
            panel=function(x,y,...) panel.ddCtErrBarchart(x=x,y=y,thr=thr,round=round, outText=outText,...),
            xlab=xlab, ylab=ylab, col=cols,...  
            )
 }
+
 
 ##----------------------------------------##
 ## old barploterrbar: to be defuncted

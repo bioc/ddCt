@@ -13,9 +13,11 @@
 
 import("Biobase")
 
-#exportPattern("^[[:alpha:]]+")
-
+## export class
 exportClasses(ddCtExpression,SDMFrame)
+
+## register S3 method
+S3method(as.data.frame, SDMFrame)
 
 export(
        barploterrbar,

@@ -18,6 +18,7 @@
 \alias{uniqueSampleNames,SDMFrame-method}
 \alias{coreData,SDMFrame-method}
 \alias{coreData<-,SDMFrame,data.frame-method}
+\alias{Ct,SDMFrame-method}
 \alias{show,SDMFrame-method}
 
 %% currently SDMFrame only
@@ -57,7 +58,8 @@
 }
 \section{Methods}{
   \describe{
-    \item{[,[[,\$}{\code{signature(x = "SDMFrame")}: primitive accessors
+    \item{[,[[,\$}{\code{signature(x = "SDMFrame")}: primitive
+  accessors. Returns an object of \code{SDMFrame-class} with the subset data.
     }
     \item{names}{\code{signature(x = "SDMFrame")}: returns the column
       names in this SDM object
@@ -122,6 +124,9 @@
     }
     \item{coreData<-}{\code{signature(object="SDMFrame")}: replace the
       data frame read from SDM file.
+    }
+    \item{Ct}{\code{signature(object="SDMFrame")}: returns the Ct value
+  of the SDM file.
     }
   }
 }

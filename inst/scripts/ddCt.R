@@ -94,11 +94,12 @@ myFoldChange <- function(x){
 prepareInput <- function(params, sdmframe, datadir) {
   input <- list()
   input$CtData = sdmframe
+  inputCt <- Ct(input$CtData)
   
   if (!is.null(params$threshold)){
-    A <- which(input$CtData[,"Ct"]>= params$threshold)
+    A <- which(inputCt>= params$threshold)
     if (length(A) > 0)
-      input$CtData[ which(input$CtData[,"Ct"]>= params$threshold),"Ct"] <- NA
+      input$CtData[ which(inputCt>= params$threshold),"Ct"] <- NA
   }
   
   if (! is.null(params$geneAlias)) detectorNames(input$CtData) <- params$geneAlias[detectorNames(input$CtData)]

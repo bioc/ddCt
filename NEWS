@@ -1,3 +1,16 @@
+Release 0.99.5 (2009-08-12)
+API Changes
+    + '[' method of 'SDMFrame' objcet returns an object of SDMFrame with the data subset (formly it returns the data.frame)
+    + '[' method does not raise warnings any more by dropping the index parameter names
+    + 'Ct' has now a method for the 'SDMFrame' object, returns a vector of Ct values in the SDMframe core data.
+    + 'SDMFrame' object can be converted to data.frame by 'as.data.frame' (S3 method)
+Internal Changes:
+    + 'ddCtExec' is modified to adapt to the API changes.
+Documentation:
+    + The above changes have been reflected in the documentation
+Bug Fixes:
+    + The 'ddCtErrBarchart' method checks whether all the expression values are 'NA', if so it stops execution.
+
 Release 0.99.4 (2009-08-06)
 Documentation
     + Vignette uses 'verbatim' instead of 'listings' package to show script codes, since the Windows server of Bioconductor does not install the package.
