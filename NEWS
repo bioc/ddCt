@@ -1,3 +1,7 @@
+Release 0.99.6 (2009-09-04)
+API Changes
+    + replaced hardcoded label 'NA' for undetectable values with 'ND'
+
 Release 0.99.5 (2009-08-12)
 API Changes
     + '[' method of 'SDMFrame' objcet returns an object of SDMFrame with the data subset (formly it returns the data.frame)

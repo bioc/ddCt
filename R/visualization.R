@@ -55,7 +55,7 @@ panel.ddCtErrBarchart <- function(x,y, thr,round, outText, ...) {
                  col="black",cex=.75, pos=1)
     }
   }
-  panel.text(x[nas], 0, "NA", pos=3,font=2, col="darkgrey")
+  panel.text(x[nas], 0, "ND", pos=3,font=2, col="darkgrey")
 }
 
 ddCtErrBarchart <- function(x,
