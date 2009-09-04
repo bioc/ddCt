@@ -757,3 +757,13 @@ setMethod("initialize", "ddCtParam", function(.Object, type, default) {
           })
 
 
+##----------------------------------------------------------------------------##
+## Class errBarchartParameter
+##----------------------------------------------------------------------------##
+setMethod("exprsUndeterminedLabel", "errBarchartParameter", function(object) {
+  object@exprsUndeterminedLabel
+})
+
+setMethod("show", "errBarchartParameter", function(object) {
+  cat("Label for Undetermined:", exprsUndeterminedLabel(object), "\n")
+})

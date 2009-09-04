@@ -60,3 +60,8 @@ setGeneric("readCoreData",function(object) standardGeneric("readCoreData"))
 setGeneric("coreData", function(object) standardGeneric("coreData"))
 setGeneric("coreData<-", function(object, value) standardGeneric("coreData<-"))
 setGeneric("headtailPrint", function(object,...) standardGeneric("headtailPrint"))
+
+##----------------------------------------------------------------------------##
+## Visualization parameter
+##----------------------------------------------------------------------------##
+setGeneric("exprsUndeterminedLabel", function(object) standardGeneric("exprsUndeterminedLabel"))

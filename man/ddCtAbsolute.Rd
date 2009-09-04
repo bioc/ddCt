@@ -26,7 +26,7 @@ ddCtAbsolute(raw.table, addData, type = "mean", ADD = -30.234, DIV = -1.6268, sa
 }
 
 \value{A an object of class
-  \code{\link[Bioconductor:eSet-class]{eSet}}. The assayData
+  \code{\link{eSet}}. The assayData
   has the following components: exprs, error, Ct, Ct.error, Difference, number\_NA, number, Plate.}
 \references{ ~put references to the literature/web site here ~ }
 \author{Markus Ruschhaupt \url{mailto:m.ruschhaupt@dkfz.de} }

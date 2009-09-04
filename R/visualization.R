@@ -38,7 +38,7 @@ panel.barchart.errbar <- function(x,y, subscripts, groups,
   }
 }
 
-panel.ddCtErrBarchart <- function(x,y, thr,round, outText, ...) {
+panel.ddCtErrBarchart <- function(x,y, thr,round, outText, parameter, ...) {
   extremes <- which(y>thr);
   extremes <- extremes[extremes <= length(y)/2]
   nas <- which(is.na(y)); nas <- nas[nas <= length(y)/2]  
@@ -55,13 +55,14 @@ panel.ddCtErrBarchart <- function(x,y, thr,round, outText, ...) {
                  col="black",cex=.75, pos=1)
     }
   }
-  panel.text(x[nas], 0, "ND", pos=3,font=2, col="darkgrey")
+  panel.text(x[nas], 0, exprsUndeterminedLabel(parameter), pos=3,font=2, col="darkgrey")
 }
 
 ddCtErrBarchart <- function(x,
                             thr=3,
                             xlab="Sample",ylab="Expression fold change",
                             cols=brewer.pal(12, "Set3"),round=0, outText=TRUE, rot=45,
+                            parameter=new("errBarchartParameter"),
                             ...) {
 
   ## if all exprs is NA, the plot will not be interpretable
@@ -73,7 +74,7 @@ ddCtErrBarchart <- function(x,
   barchart(exprs + level.err ~ Var2 | Var1, data=x, 
            scales=list(x=list(rot=rot), y=list(alternating=1, at=seq(0, thr, 0.5))),
            ylim=c(0, thr*1.1),
-           panel=function(x,y,...) panel.ddCtErrBarchart(x=x,y=y,thr=thr,round=round, outText=outText,...),
+           panel=function(x,y,...) panel.ddCtErrBarchart(x=x,y=y,thr=thr,round=round, outText=outText,parameter=parameter,...),
            xlab=xlab, ylab=ylab, col=cols,...  
            )
 }

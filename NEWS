@@ -1,4 +1,8 @@
-Release 0.99.6 (2009-09-04)
+Release 0.99.7 (2009-09-04, David)
+API Changes
+    + Add Class 'errBarchartParameter' to organize errBarchart parameters.
+
+Release 0.99.6 (2009-09-04, Rudolf)
 API Changes
     + replaced hardcoded label 'NA' for undetectable values with 'ND'
 

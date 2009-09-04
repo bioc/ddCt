@@ -7,6 +7,7 @@
 ##  AllClasses.R
 ##  Created on: Oct 23, 2008
 ##      Author: Rudolf Biczok <r.biczok@dkfz-heidelberg.de>
+##              Jitao David Zhang <j.zhang@dkfz-heidelberg.de>
 ##      Description: ddCt classes
 ##
 ################################################################################
@@ -35,3 +36,10 @@ setClass("SDMFrame",
  
 setClass("ddCtParam",
 		 representation(type="character",default="ANY"))
+
+##----------------------------------------------------------------------------##
+## Visualization paramater set
+##----------------------------------------------------------------------------##
+setClass("errBarchartParameter",
+         representation(exprsUndeterminedLabel="character"),
+         prototype(exprsUndeterminedLabel="ND"))
