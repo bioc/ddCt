@@ -46,6 +46,19 @@ writeLines.ddCt <- function(expSet, con=stdout(),sep="\n",type="html",name="expr
   writeLines(txt, con=con,sep=sep)
 }
 
+## write tab-delimited, not quoted and no-row-name CSV files
+writeSimpleTabCsv <- function(x, file="",...) {
+  Call <- match.call(expand.dots=TRUE)
+  for(argname in c("row.names", "sep", "quote")) {
+    if (!is.null(Call[[argname]]))
+      warning(gettextf("attemp to set '%s' ignored", argname), domain=NA)
+  }
+  Call$row.names <- FALSE
+  Call$sep <- "\t"
+  Call$quote <- FALSE
+  Call[[1L]] <- as.name("write.table")
+  eval.parent(Call)
+}
 
 ## write html table, contributed by Andreas Buness
 ##------------------------------------------------------------

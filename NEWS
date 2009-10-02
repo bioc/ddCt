@@ -1,3 +1,7 @@
+Release 0.99.8 (2009-10-02, David)
+API Changes:
+    + Add function 'writeSimpleTabCsv' for both human-reader and machine friendly reporting of tables.
+
 Release 0.99.7 (2009-09-04, David)
 API Changes
     + Add Class 'errBarchartParameter' to organize errBarchart parameters.

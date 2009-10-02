@@ -28,9 +28,11 @@ export(
        elistWrite,
        errBarchart,
        SDMFrame,
-       readSDM,
-       #writeLines.ddCt,
-       write.htmltable)
+       readSDM)
+
+## report functions
+export(write.htmltable,
+       writeSimpleTabCsv)
 
  exportMethods(level,
                levelErr,
