@@ -47,6 +47,12 @@ setGeneric("uniqueDetectorNames<-",function(object, target, value) standardGener
 setGeneric("uniqueSampleNames",function(object) standardGeneric("uniqueSampleNames"))
 setGeneric("uniqueSampleNames<-",function(object, target, value) standardGeneric("uniqueSampleNames<-"))
 
+setGeneric("removeSample", function(object, sample) standardGeneric("removeSample"))
+setGeneric("removeDetector", function(object, detector) standardGeneric("removeDetector"))
+
+setGeneric("replaceSample", function(object, target, value) standardGeneric("replaceSample"))
+setGeneric("replaceDetector", function(object, target, value) standardGeneric("replaceDetector"))
+
 setGeneric("fileNames",function(object) standardGeneric("fileNames"))
 
 setGeneric("ddCtExpression",function(object, warningStream, algorithm, calibrationSample, housekeepingGenes, type, sampleInformation, toZero, efficiencies, efficiencies.error) standardGeneric("ddCtExpression"))

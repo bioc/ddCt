@@ -1,3 +1,7 @@
+Release 0.99.9 (not finished yet, David)
+Changes:
+    + (r42509) Add methods "replaceDetector", "replaceSample", "removeSample", "removeDetector". Not documented nor tested yet, therefore internal for now. 
+
 Release 0.99.8 (2009-10-02, David)
 API Changes:
     + Add function 'writeSimpleTabCsv' for both human-reader and machine friendly reporting of tables.

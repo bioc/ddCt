@@ -228,6 +228,51 @@ setReplaceMethod("uniqueSampleNames", signature(object="SDMFrame",target="missin
                    return(object)
                  })
 
+## TODO: write test
+replaceVectorByEquality <- function(vector, target, value) {
+  stopifnot(length(target) == length(value))
+  isTargetNotInVector <- !target %in% vector
+  if(any(isTargetNotInVector)) {
+    warning(gettextf("Following 'targets' are not found in the given vector: %s\n",
+                     paste(target[isTargetNotInVector], collapse=",")
+                     ), domain=NA)
+  }
+
+  target <- target[!isTargetNotInVector]
+  value <- value[!isTargetNotInVector]
+
+  for(i in seq(along=target)) {
+    targetNow <- target[i]
+    isTargetNow <- targetNow == vector
+    vector[isTargetNow] <- value[i]
+  }
+  return(vector)
+}
+
+setMethod("replaceDetector", signature(object="SDMFrame", target="character", value="character"),
+          function(object, target, value) {
+            newDetectorNames <- replaceVectorByEquality(detectorNames(object), target, value)
+            detectorNames(object) <- newDetectorNames
+            return(object)
+          })
+
+setMethod("replaceSample", signature(object="SDMFrame", target="character", value="character"),
+          function(object, target, value) {
+            newSampleNames <- replaceVectorByEquality(sampleNames(object), target, value)
+            sampleNames(object) <- newSampleNames
+            return(object)
+          })
+setMethod("removeSample", signature(object="SDMFrame", sample="character"),
+          function(object, sample) {
+            object <- object[!sampleNames(object) %in% sample,]
+            return(object)
+          })
+setMethod("removeDetector", signature(object="SDMFrame", detector="character"),
+          function(object, detector) {
+            object <- object[!detectorNames(object) %in% detector,]
+            return(object)
+          })
+
 ##----------------------------------------##
 ## censoring
 ##----------------------------------------##
