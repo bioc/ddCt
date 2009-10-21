@@ -30,23 +30,26 @@ export(
        SDMFrame,
        readSDM)
 
+## report auxilliary functions
+export(replaceVectorByEquality)
+
 ## report functions
 export(write.htmltable,
        writeSimpleTabCsv)
 
- exportMethods(level,
-               levelErr,
-               Ct,
-               CtErr,
-               dCt,
-               dCtErr,
-               ddCt,
-               ddCtErr,
-               numberCt,
-               numberNA,
-               ddCtExpression,
-               errBarchart
-               )
+exportMethods(level,
+              levelErr,
+              Ct,
+              CtErr,
+              dCt,
+              dCtErr,
+              ddCt,
+              ddCtErr,
+              numberCt,
+              numberNA,
+              ddCtExpression,
+              errBarchart
+              )
 
 ## mainly for SDMFrame
 exportMethods(coreData,
@@ -60,4 +63,8 @@ exportMethods(coreData,
               uniqueSampleNames,
               "uniqueSampleNames<-",
               "detectorNames<-",
-              detectorNames)
+              detectorNames,
+              "replaceDetector",
+              "replaceSample",
+              "removeDetector",
+              "removeSample")

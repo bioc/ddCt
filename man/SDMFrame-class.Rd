@@ -36,6 +36,20 @@
 \alias{rightCensoring}
 \alias{rightCensoring,SDMFrame,numeric-method}
 
+%% replace and remove
+\alias{removeDetector}
+\alias{removeDetector-methods}
+\alias{removeDetector,SDMFrame,character-method}
+\alias{removeSample}
+\alias{removeSample-methods}
+\alias{removeSample,SDMFrame,character-method}
+\alias{replaceDetector}
+\alias{replaceDetector-methods}
+\alias{replaceDetector,SDMFrame,character,character-method}
+\alias{replaceSample}
+\alias{replaceSample-methods}
+\alias{replaceSample,SDMFrame,character,character-method}
+
 \title{Working with SDM files}
 \description{ The class SDMFrame provides core functionalities to read
   gene and sample information from SDM files and calculate them with a
@@ -107,8 +121,23 @@
     \item{uniqueSampleNames}{\code{signature(object = "SDMFrame")}:
       returns a vector of unique sample names in this SDM object
     }
+    \item{removeSample}{\code{signature(object = "SDMFrame", sample="character")}:
+      removes the sample(s) specified from the SDMFrame object
+    }
+    \item{replaceDetector}{\code{signature(object = "SDMFrame",
+	target="character", value="character")}:
+      replace the detectors equal to the target with the value. Both
+      \code{target} and \code{value} can be vectors of the same length,
+      then the replace takes place iteratively.
+    }
+    \item{replaceSample}{\code{signature(object = "SDMFrame",
+	target="character", value="character")}:
+      replace the samples equal to the target with the value. Both
+      \code{target} and \code{value} can be vectors of the same length,
+      then the replace takes place iteratively.
+    }
     \item{show}{\code{signature(object="SDMFrame")}: pretty print of the
-      SDMFrame instance
+      SDMFrame instance.
     }
     \item{rightCensoring}{\code{signature(object="SDMFrame",
 	threshold="numeric")}: Right censoring the Ct value,  which
@@ -126,7 +155,7 @@
       data frame read from SDM file.
     }
     \item{Ct}{\code{signature(object="SDMFrame")}: returns the Ct value
-  of the SDM file.
+      of the SDM file.
     }
   }
 }
@@ -162,6 +191,14 @@ uniqueSampleNames(sampdat)
 ## or use this syntax to replace the gene names
 uniqueDetectorNames(sampdat) <- c(Gene1="NewGene1", Gene2="NewGene2")
 uniqueDetectorNames(sampdat)
+
+## remove sample or detector
+removeSample(sampdat, "Sample1")
+removeDetector(sampdat, "Gene1")
+
+## replace sample or detector
+replaceSample(sampdat, "Sample1", "Sample0")
+replaceDetector(sampdat, "Gene1", "PLCG1")
 
 ## right censoring the data
 rightCensoring(sampdat, 35)

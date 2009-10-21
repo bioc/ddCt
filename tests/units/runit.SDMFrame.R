@@ -57,6 +57,83 @@ test.SDMFrame.fileNames <- function()
   checkEquals(unique(test.SDMFrame.data.sdm@file), fileNames(test.SDMFrame.data.sdm))
 }
 
+test.replaceVectorByEquality <- function() {
+  vector <- c("USA","China","Russia","UK", "Germany", "Germany")
+  perfectTarget <- c("Germany", "China", "Russia")
+  perfectValue <- c("Deutschland", "VR China", "Russland")
+
+  checkEquals(c("USA", "VR China", "Russland", "UK", "Deutschland", "Deutschland"),
+              replaceVectorByEquality(vector=vector, target=perfectTarget,
+                                      value=perfectValue))
+
+  imperfectTarget <- c("Indian", "China", "Russia")
+  imperfectValue <- c("Indien", "VR China", "Russland")
+
+  checkEquals(c("USA", "VR China", "Russland", "UK", "Germany", "Germany"),
+              replaceVectorByEquality(vector=vector, target=imperfectTarget,
+                                      value=imperfectValue))
+}
+
+test.replaceDetector <- function() {
+  newSDMframe <- replaceDetector(object=test.SDMFrame.data.sdm,
+                                 target="Gene3",
+                                 value="GeneDrei")
+  checkEquals(detectorNames(newSDMframe),
+              rep(rep(c("GeneDrei", "Gene2", "Gene1"), each=3),2))
+
+  multiReplaceDetectorSDMframe <- replaceDetector(object=test.SDMFrame.data.sdm,
+                                                   target=c("Gene3","Gene2"),
+                                                  value=c("GeneDrei","GeneZwei"))
+  checkEquals(detectorNames( multiReplaceDetectorSDMframe ),
+              rep(rep(c("GeneDrei", "GeneZwei", "Gene1"), each=3),2))
+
+  checkException(targetValueNotEquallyLong <- replaceDetector(object=test.SDMFrame.data.sdm,
+                                                              target=c("Gene3","Gene2"),
+                                                              value=c("GeneDrei")), silent=TRUE)
+}
+
+test.replaceSample <- function() {
+  newSDMframe <- replaceSample(object=test.SDMFrame.data.sdm,
+                               target="Sample2",
+                               value="SampleZwei")
+  checkEquals(sampleNames(newSDMframe),
+              rep(c("Sample1", "SampleZwei"), each=9))
+
+  multiReplaceSampleSDMframe <- replaceSample(object=test.SDMFrame.data.sdm,
+                                                target=c("Sample1","Sample2"),
+                                                value=c("SampleEins","SampleZwei"))
+  checkEquals(sampleNames( multiReplaceSampleSDMframe ),
+              rep(c("SampleEins", "SampleZwei"), each=9))
+
+  checkException(targetValueNotEquallyLong <- replaceSample(object=test.SDMFrame.data.sdm,
+                                                              target=c("Sample3","Sample2"),
+                                                              value=c("SampleDrei")), silent=TRUE)
+}
+
+test.removeDetector <- function() {
+  newSDMframe <- removeDetector(object=test.SDMFrame.data.sdm,
+                                detector="Gene1")
+  checkEquals(detectorNames(newSDMframe),
+              rep(rep(c("Gene3", "Gene2"), each=3), 2))
+
+  foreignNameSDMframe <- removeDetector(object=test.SDMFrame.data.sdm,
+                                detector=c("Gene1","Gene4"))
+  checkEquals(detectorNames(foreignNameSDMframe),
+              rep(rep(c("Gene3", "Gene2"), each=3), 2))
+}
+
+test.removeSample <- function() {
+  newSDMframe <- removeSample(object=test.SDMFrame.data.sdm,
+                                sample="Sample1")
+  checkEquals(sampleNames(newSDMframe),
+              rep("Sample2", 9))
+  
+  foreignNameSDMframe <- removeSample(object=test.SDMFrame.data.sdm,
+                                sample=c("Sample1","Sample4"))
+  checkEquals(sampleNames(foreignNameSDMframe),
+              rep("Sample2", 9))
+}
+
 assign("test.SDMFrame.uniqueSampleNames<-", function()
 {
   sdm <- test.SDMFrame.data.sdm
