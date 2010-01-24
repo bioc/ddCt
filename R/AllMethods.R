@@ -27,6 +27,14 @@ setMethod("errBarchart", "ddCtExpression",
 ##----------------------------------------##
 ## elist, elistWrite, as(from ,"data.frame")
 ##----------------------------------------##
+setAs(from="data.frame",to="ddCtExpression", 
+      def=function(from) {
+        to.coreData <- from;
+      })
+
+##----------------------------------------##
+## elist, elistWrite, as(from ,"data.frame")
+##----------------------------------------##
 setAs(from="ddCtExpression",to="data.frame", 
       def=function(from) {
         aD <- assayData(from)
@@ -103,110 +111,134 @@ setMethod("numberNA", "ddCtExpression", function(object) {
 })
 
 ################################################################################
-## Class SDMFrame
+## Class InputFrame
 ################################################################################
 
 ##----------------------------------------##
-## constructor for parameter initialisation
+## constructor 
 ##----------------------------------------##
-setMethod("initialize", "SDMFrame",
-          function(.Object, files) {
-            .Object@files <- files
-            .Object@coreData <- readCoreData(.Object)
-            
+
+setMethod("initialize", "InputFrame",
+          function(.Object, cd, file.name) {
+            if(!missing(cd)) {
+              if(!missing(cd))
+                .Object@files  <- file.name
+              if (! all (PRIMARY.INPUT.COLS %in% colnames(cd)))
+                stop(gettextf("Your file does not contain the columns %s and '%s'.",
+                              paste(sQuote(PRIMARY.INPUT.COLS[1:length(PRIMARY.INPUT.COLS)-1]), collapse=" "),
+                              PRIMARY.INPUT.COLS[length(PRIMARY.INPUT.COLS)]))
+              cd <- cd[,PRIMARY.INPUT.COLS]
+              Platename <- rep(basename(file.name), nrow(cd))
+              coreData(.Object) <- rbind(coreData(.Object),cbind(cd,Platename))
+              ow <- getOption("warn")
+              options(warn=-1)
+              coreData(.Object)[,"Ct"] <- as.numeric(coreData(.Object)[,"Ct"])
+              options(warn=ow)
+              coreData(.Object)[,"Platename"] <- as.character(coreData(.Object)[,"Platename"])
+              
+              isNotNilStr <- coreData(.Object)$Sample!= "" & coreData(.Object)$Detector != ""
+              coreData(.Object) <- coreData(.Object)[isNotNilStr,]
+            }
             return(.Object)
           })
 
 ##----------------------------------------##
 ## getter methods
 ##----------------------------------------##
-setMethod("coreData", "SDMFrame", function(object) {
+setMethod("coreData", "InputFrame", function(object) {
   return(object@coreData)
 })
 
-setMethod("fileNames", "SDMFrame", function(object) {
+setMethod("fileNames", "InputFrame", function(object) {
   return(object@files)
 })
 
-setMethod("names", "SDMFrame", function(x) {
+setMethod("names", "InputFrame", function(x) {
   return(names(x@coreData))
 })
 
-setMethod("detectorNames", "SDMFrame", function(object) {
+setMethod("detectorNames", "InputFrame", function(object) {
   return(object@coreData$Detector)
 })
 
-setMethod("sampleNames", "SDMFrame", function(object) {
+setMethod("sampleNames", "InputFrame", function(object) {
   return(object@coreData$Sample)
 })
 
-setMethod("uniqueDetectorNames", "SDMFrame", function(object) {
+setMethod("uniqueDetectorNames", "InputFrame", function(object) {
   return(unique(object@coreData$Detector))
 })
 
-setMethod("uniqueSampleNames", "SDMFrame", function(object) {
+setMethod("uniqueSampleNames", "InputFrame", function(object) {
   return(unique(object@coreData$Sample))
 })
 
-setMethod("$", "SDMFrame", function(x, name) {
+setMethod("$", "InputFrame", function(x, name) {
   return(x@coreData[,name])
 })
 
-setMethod("[", "SDMFrame", function(x, i, j, ..., drop) {
+setMethod("[", "InputFrame", function(x, i, j, ..., drop) {
   subCoreData <- x@coreData[i, j, ..., drop=FALSE]
   coreData(x) <- subCoreData
   return(x)
 })
 
-setMethod("Ct", "SDMFrame", function(object) {
+##currently disabled
+##setMethod("[[", "InputFrame", function(x, i,j, ...,exact) {
+##  return(x@coreData[[i=i, j=j, ..., exact=exact]])
+##})
+
+setMethod("Ct", "InputFrame", function(object) {
   coreData(object)$Ct
 })
 
+##----------------------------------------##
 ## casting methods
-setAs(from="SDMFrame", to="data.frame", def=function(from) {
+##----------------------------------------##
+
+setAs(from="InputFrame", to="data.frame", def=function(from) {
   return(coreData(from))
 })
 
-### S3 method as.data.frame
-as.data.frame.SDMFrame <- function(x, row.names=NULL, optional=FALSE,...) {
+setAs(from="data.frame", to="InputFrame", def=function(from) {
+  return(new("InputFrame",from))
+})
+
+### S3 methods
+
+as.data.frame.InputFrame <- function(x, row.names=NULL, optional=FALSE,...) {
   cd <- coreData(x)
   return(as.data.frame(cd, row.names=row.names, optional=optional,...))
 }
-
-
-##currently disabled
-##setMethod("[[", "SDMFrame", function(x, i,j, ...,exact) {
-##  return(x@coreData[[i=i, j=j, ..., exact=exact]])
-##})
 
 ##----------------------------------------##
 ## setter methods
 ##----------------------------------------##
 
-setReplaceMethod("detectorNames", signature(object="SDMFrame",value="character"),
+setReplaceMethod("detectorNames", signature(object="InputFrame",value="character"),
                  function(object, value) {
                    object@coreData$Detector <- value
                    return(object)
                  })
 
-setReplaceMethod("coreData", c("SDMFrame","data.frame"), function(object, value) {
+setReplaceMethod("coreData", signature(object="InputFrame", value="data.frame"), function(object, value) {
   object@coreData <- value
   return(object)
 })
 
-setReplaceMethod("sampleNames", signature(object="SDMFrame", value="character"),
+setReplaceMethod("sampleNames", signature(object="InputFrame", value="character"),
                  function(object, value) {
                    object@coreData$Sample <- value
                    return(object)
                  })
 
-setReplaceMethod("uniqueDetectorNames", signature(object="SDMFrame",target="character", value="character"),
+setReplaceMethod("uniqueDetectorNames", signature(object="InputFrame",target="character", value="character"),
                  function(object, target, value) {
                    object@coreData$Detector <- replaceNames(object@coreData$Detector, target, value)
 				   return(object)
                  })
 
-setReplaceMethod("uniqueDetectorNames", signature(object="SDMFrame",target="missing", value="character"),
+setReplaceMethod("uniqueDetectorNames", signature(object="InputFrame",target="missing", value="character"),
                  function(object, target, value) {
                    target <- names(value)
                    value <- as.character(value)
@@ -214,13 +246,13 @@ setReplaceMethod("uniqueDetectorNames", signature(object="SDMFrame",target="miss
 				   return(object)
                  })
 
-setReplaceMethod("uniqueSampleNames", signature(object="SDMFrame", target="character", value="character"),
+setReplaceMethod("uniqueSampleNames", signature(object="InputFrame", target="character", value="character"),
                  function(object, target, value) {
 		   object@coreData$Sample <- replaceNames(object@coreData$Sample, target, value)
                    return(object)
                  })
 
-setReplaceMethod("uniqueSampleNames", signature(object="SDMFrame",target="missing", value="character"),
+setReplaceMethod("uniqueSampleNames", signature(object="InputFrame",target="missing", value="character"),
                  function(object, target, value) {
                    target <- names(value)
                    value <- as.character(value)
@@ -228,46 +260,25 @@ setReplaceMethod("uniqueSampleNames", signature(object="SDMFrame",target="missin
                    return(object)
                  })
 
-## TODO: write test
-replaceVectorByEquality <- function(vector, target, value) {
-  stopifnot(length(target) == length(value))
-  isTargetNotInVector <- !target %in% vector
-  if(any(isTargetNotInVector)) {
-    warning(gettextf("Following 'targets' are not found in the given vector: %s\n",
-                     paste(target[isTargetNotInVector], collapse=",")
-                     ), domain=NA)
-  }
-
-  target <- target[!isTargetNotInVector]
-  value <- value[!isTargetNotInVector]
-
-  for(i in seq(along=target)) {
-    targetNow <- target[i]
-    isTargetNow <- targetNow == vector
-    vector[isTargetNow] <- value[i]
-  }
-  return(vector)
-}
-
-setMethod("replaceDetector", signature(object="SDMFrame", target="character", value="character"),
+setMethod("replaceDetector", signature(object="InputFrame", target="character", value="character"),
           function(object, target, value) {
             newDetectorNames <- replaceVectorByEquality(detectorNames(object), target, value)
             detectorNames(object) <- newDetectorNames
             return(object)
           })
 
-setMethod("replaceSample", signature(object="SDMFrame", target="character", value="character"),
+setMethod("replaceSample", signature(object="InputFrame", target="character", value="character"),
           function(object, target, value) {
             newSampleNames <- replaceVectorByEquality(sampleNames(object), target, value)
             sampleNames(object) <- newSampleNames
             return(object)
           })
-setMethod("removeSample", signature(object="SDMFrame", sample="character"),
+setMethod("removeSample", signature(object="InputFrame", sample="character"),
           function(object, sample) {
             object <- object[!sampleNames(object) %in% sample,]
             return(object)
           })
-setMethod("removeDetector", signature(object="SDMFrame", detector="character"),
+setMethod("removeDetector", signature(object="InputFrame", detector="character"),
           function(object, detector) {
             object <- object[!detectorNames(object) %in% detector,]
             return(object)
@@ -276,7 +287,7 @@ setMethod("removeDetector", signature(object="SDMFrame", detector="character"),
 ##----------------------------------------##
 ## censoring
 ##----------------------------------------##
-setMethod("rightCensoring", signature(object="SDMFrame", threshold="numeric"),
+setMethod("rightCensoring", signature(object="InputFrame", threshold="numeric"),
           function(object, threshold, value) {
             if(missing(value))
               value <- as.numeric(NA)
@@ -291,7 +302,7 @@ setMethod("rightCensoring", signature(object="SDMFrame", threshold="numeric"),
 ## ddCtExpression public user method
 ##----------------------------------------##
 
-setMethod("ddCtExpression", "SDMFrame",
+setMethod("ddCtExpression", "InputFrame",
           function(object,
                    warningStream,
                    algorithm,
@@ -340,41 +351,10 @@ setMethod("ddCtExpression", "SDMFrame",
           })
 
 ##----------------------------------------##
-## readCoreData
-##----------------------------------------##
-setMethod("readCoreData", "SDMFrame", function(object) {
-	Ctvalues <- c()
-	for (file.name in  object@files){
-          x <- scan(file=file.name,what="character",sep="\n",blank.lines.skip=TRUE,quiet=TRUE)
-          CTstart <- grep("^Well",x)
-          CTend   <- grep("^Summary",x)
-          if(length(CTstart)==0 | length(CTend)==0) stop("Your file does not seem to be a .sdm file!")
-          
-          number.of.skips <- CTstart - 1
-          number.of.rows  <- (CTend - 1 ) - CTstart ## the first one becomes the Header and will not affect nrow
-          w <- read.table(file.name,sep="\t",nrows=number.of.rows,skip=number.of.skips,header=TRUE,as.is=TRUE, blank.lines.skip = TRUE, comment.char="")
-          if (! all (c("Ct","Detector","Sample")%in% colnames(w))) stop("Your file does not contain the columns 'Ct','Detector' and 'Sample.")
-          w <- w[,c("Sample","Detector","Ct")]
-          Platename <- rep(basename(file.name), nrow(w))
-          Ctvalues <- rbind(Ctvalues,cbind(w,Platename))
-	}
-	ow <- getOption("warn")
-	options(warn=-1)
-	Ctvalues[,"Ct"] <- as.numeric(Ctvalues[,"Ct"])
-	options(warn=ow)
-	Ctvalues[,"Platename"] <- as.character( Ctvalues[,"Platename"])
-
-        isNotNilStr <- Ctvalues$Sample!= "" & Ctvalues$Detector != ""
-	Ctvalues <- Ctvalues[isNotNilStr,]
-	
-	return(Ctvalues)
-})
-
-##----------------------------------------##
 ## ddCtwithEExec ddCt algorithm
 ##               with efficiencies
 ##----------------------------------------##
-setMethod("ddCtWithEExec", "SDMFrame",
+setMethod("ddCtWithEExec", "InputFrame",
           function(object,
                    calibrationSample,
                    housekeepingGenes,
@@ -575,7 +555,7 @@ setMethod("ddCtWithEExec", "SDMFrame",
 ##          expression with ddCt method
 ##----------------------------------------##
 
-setMethod("ddCtExec", "SDMFrame",
+setMethod("ddCtExec", "InputFrame",
           function(object,
                    calibrationSample,
                    housekeepingGenes,
@@ -759,6 +739,10 @@ setMethod("ddCtExec", "SDMFrame",
             return(result)
           })
 
+##----------------------------------------##
+## utility methods
+##----------------------------------------##
+
 setMethod("headtailPrint", "data.frame", function(object, head=2L, tail=2L, digits=NULL, quote=FALSE, right=TRUE, row.names=TRUE) {
   subhead <- head(object, head)
   subtail <- tail(object, tail)
@@ -768,15 +752,17 @@ setMethod("headtailPrint", "data.frame", function(object, head=2L, tail=2L, digi
   print(subd, digits=digits, quote=quote, right=right, row.names=row.names)
 })
 
-setMethod("show", "SDMFrame", function(object) {
-  cat("An instance of SDMFrame:\n")
+setMethod("show", "InputFrame", function(object) {
+  cat(gettextf("An instance of %s:\n", class(object)))
   cored <- coreData(object)
   wid <- options()$width; decwid <- round(wid*0.85) ## decorator width
   decs <- paste(rep("=", decwid),collapse="")
-  
-  cat(decs, "\n")
-  headtailPrint(cored, row.names=FALSE)
-  cat(decs, "\n")
+
+  if(nrow(coreData(object)) > 0) {
+    cat(decs, "\n")
+    headtailPrint(cored, row.names=FALSE)
+    cat(decs, "\n")
+  }
   
   cat(nrow(cored), "Sample-Detector pairs\n")
 
@@ -787,6 +773,136 @@ setMethod("show", "SDMFrame", function(object) {
               paste(sQuote(object@files), collapse=", ")), "\n")
 
 })
+
+setMethod("rbind2", signature(x="InputFrame", y="InputFrame"), function(x,y) {
+  coreData(x) <- rbind(coreData(x),coreData(y))
+  x@files     <- c(x@files, y@files) 
+  return(x)
+})
+
+setMethod("rbind2", signature(x="InputFrame", y="data.frame"), function(x,y) {
+  coreData(x) <- rbind(coreData(x),new("InputFrame",y))
+  x@files     <- c(x@files, class(y)) 
+  return(x)
+})
+
+################################################################################
+## Class SDMFrame
+################################################################################
+
+##----------------------------------------##
+## readCoreData
+##----------------------------------------##
+
+## setMethod("readRawData", "SDMFrame", function(object) {
+## 	Ctvalues <- c()
+## 	for (file.name in  object@files){
+##           x <- scan(file=file.name,what="character",sep="\n",blank.lines.skip=TRUE,quiet=TRUE)
+##           CTstart <- grep("^Well",x)
+##           CTend   <- grep("^Summary",x)
+##           if(length(CTstart)==0 | length(CTend)==0) stop("Your file does not seem to be a .sdm file!")
+          
+##           number.of.skips <- CTstart - 1
+##           number.of.rows  <- (CTend - 1 ) - CTstart ## the first one becomes the Header and will not affect nrow
+##           w <- read.table(file.name,sep="\t",nrows=number.of.rows,skip=number.of.skips,header=TRUE,as.is=TRUE, blank.lines.skip = TRUE, comment.char="")
+##           if (! all (c("Ct","Detector","Sample")%in% colnames(w))) stop("Your file does not contain the columns 'Ct','Detector' and 'Sample.")
+##           w <- w[,c("Sample","Detector","Ct")]
+##           Platename <- rep(basename(file.name), nrow(w))
+##           Ctvalues <- rbind(Ctvalues,cbind(w,Platename))
+## 	}
+## 	ow <- getOption("warn")
+## 	options(warn=-1)
+## 	Ctvalues[,"Ct"] <- as.numeric(Ctvalues[,"Ct"])
+## 	options(warn=ow)
+## 	Ctvalues[,"Platename"] <- as.character( Ctvalues[,"Platename"])
+
+##         isNotNilStr <- Ctvalues$Sample!= "" & Ctvalues$Detector != ""
+## 	Ctvalues <- Ctvalues[isNotNilStr,]
+	
+## 	return(Ctvalues)
+## })
+
+################################################################################
+## Class InputReader
+################################################################################
+
+##----------------------------------------##
+## factory methods 
+##----------------------------------------##
+
+setMethod("InputFrame", "InputReader",
+          function(object) {
+            inputFrame <- new("InputFrame");
+            for (file.name in object@files){
+              rawData <- readRawData(object, file.name)
+              names(rawData)[object@colmap@colmap %in% colnames(rawData)] <- names(object@colmap@colmap)
+              extra <- new("InputFrame", rawData, file.name)
+              inputFrame <- rbind2(inputFrame, extra)
+            }
+            return(inputFrame)
+          })
+
+################################################################################
+## Class SDMReader
+################################################################################
+
+##----------------------------------------##
+## constructor 
+##----------------------------------------##
+
+setMethod("initialize", "SDMReader",
+          function(.Object, files, colmap) {
+            .Object@files <- files
+            if(missing(colmap))
+              .Object@colmap <- ColMap()
+            else
+              .Object@colmap <- colmap
+            return(.Object)
+          })
+
+setMethod("readRawData", signature(object="SDMReader",file.name="character"),
+          function(object, file.name) {
+            x <- scan(file=file.name,what="character",sep="\n",blank.lines.skip=TRUE,quiet=TRUE)
+            CTstart <- grep("^Well",x)
+            CTend   <- grep("^Summary",x)
+            if(length(CTstart)==0 | length(CTend)==0) stop("Your file does not seem to be a .sdm file!")
+            number.of.skips <- CTstart - 1
+            number.of.rows  <- (CTend - 1 ) - CTstart ## the first one becomes the Header and will not affect nrow
+            rawdata <- read.table(file.name,sep="\t",
+                                  nrows=number.of.rows,
+                                  skip=number.of.skips,
+                                  header=TRUE,
+                                  as.is=TRUE,
+                                  blank.lines.skip = TRUE,
+                                  comment.char="")
+            return(rawdata)
+          })
+
+################################################################################
+## Class CSVReader
+################################################################################
+
+##----------------------------------------##
+## constructor 
+##----------------------------------------##
+
+setMethod("initialize", "CSVReader",
+          function(.Object, files, colmap) {
+            .Object@files <- files
+            .Object@colmap <- colmap
+            return(.Object)
+          })
+
+setMethod("readRawData", signature(object="CSVReader",file.name="character"),
+          function(object, file.name) {
+            rawdata <- read.table(file.name,sep="\t",
+                                  header=TRUE,
+                                  as.is=TRUE,
+                                  blank.lines.skip = TRUE,
+                                  comment.char="")
+            return(rawdata)
+          })
+
 ################################################################################
 ## Class ddCtParam
 ################################################################################
@@ -801,7 +917,6 @@ setMethod("initialize", "ddCtParam", function(.Object, type, default) {
             return(.Object)
           })
 
-
 ##----------------------------------------------------------------------------##
 ## Class errBarchartParameter
 ##----------------------------------------------------------------------------##
@@ -811,4 +926,27 @@ setMethod("exprsUndeterminedLabel", "errBarchartParameter", function(object) {
 
 setMethod("show", "errBarchartParameter", function(object) {
   cat("Label for Undetermined:", exprsUndeterminedLabel(object), "\n")
+})
+
+################################################################################
+## Class ColMap
+################################################################################
+
+setMethod("initialize", "ColMap", function(.Object, ...) {
+  .Object@colmap <- list(...)
+  col.org <- allNames(.Object@colmap)
+  for (i in seq_along(.Object@colmap)) {
+    ei <- el(.Object@colmap, i)
+    if (!is.character(ei) || length(ei) != 1L || !nzchar(ei)) 
+      stop(gettextf("element %d of the original column name was not a single character string", 
+                    i))
+    ei <- el(col.org,i)
+    if (!is.character(ei) || length(ei) != 1L || !nzchar(ei)) 
+      stop(gettextf("element %d of the new column name was not a single character string", 
+                    i))
+  }
+  if (anyDuplicated(col.org)) 
+    stop(gettextf("duplicated column: %s", paste(sQuote(col.org[duplicated(col.org)]), 
+                                                     collapse = "")))
+  return(.Object)
 })

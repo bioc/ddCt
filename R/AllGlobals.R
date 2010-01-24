@@ -7,7 +7,7 @@
 ##  AllGlobals.R
 ##  Created on: Oct 23, 2008
 ##      Author: Rudolf Biczok <r.biczok@dkfz-heidelberg.de>
-##      Description: TODO
+##      Description: Some global definitions
 ##
 ################################################################################
 
@@ -22,4 +22,9 @@ SUB.PARAM.SYNTAX        <- "^([^-\\s]+)=([^\\s]+)$"
 ## programm Rscript
 ############################################
 SYS.PARAM.SYNTAX        <- "^--([^=\\s]+)=?([^\\s]*)$"
+
+############################################
+## used columns of data
+############################################
+PRIMARY.INPUT.COLS      <- c("Sample","Detector","Ct");
 

@@ -12,8 +12,9 @@
 ################################################################################
 
 ##----------------------------------------##
-## replaceNames used in class SDMFrame
+## functions used in class SDMFrame
 ##----------------------------------------##
+
 replaceNames <- function(oldName ,targetName, newName) {
   if(is.null(targetName))
     stop("too few targets to replace")
@@ -38,17 +39,45 @@ replaceNames <- function(oldName ,targetName, newName) {
   return(oldName)
 }
 
+replaceVectorByEquality <- function(vector, target, value) {
+  stopifnot(length(target) == length(value))
+  isTargetNotInVector <- !target %in% vector
+  if(any(isTargetNotInVector)) {
+    warning(gettextf("Following 'targets' are not found in the given vector: %s\n",
+                     paste(target[isTargetNotInVector], collapse=",")
+                     ), domain=NA)
+  }
+
+  target <- target[!isTargetNotInVector]
+  value <- value[!isTargetNotInVector]
+
+  for(i in seq(along=target)) {
+    targetNow <- target[i]
+    isTargetNow <- targetNow == vector
+    vector[isTargetNow] <- value[i]
+  }
+  return(vector)
+}
+
 ################################################################################
 ### alias functions
 ################################################################################
 
-SDMFrame <- function(files) {
-  return(new("SDMFrame",file=files));
+#InputFrame <- function(files, colmaping, ...) {
+#  return(new("InputFrame",files=files, colmaping=colmaping, ...));
+#}
+
+SDMFrame <- function(file) {
+#  .Deprecated("InputFrame",package="ddCt");
+  return(InputFrame(new("SDMReader",files=file)))
 }
 
-readSDM <- function(files) {
-  .Deprecated("SDMFrame",package="ddCt");
-  return(SDMFrame(file=files))
+ColMap <- function(...) {
+  return(new("ColMap",...));
+}
+
+readSDM <- function(file) {
+  .Defunct("InputFrame",package="ddCt");
 }
 
 ################################################################################

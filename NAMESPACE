@@ -14,10 +14,15 @@
 import("Biobase")
 
 ## export class
-exportClasses(ddCtExpression,SDMFrame)
+exportClasses(ddCtExpression,
+              InputFrame,
+              InputReader,
+              SDMReader,
+              CSVReader,
+              ColMap)
 
 ## register S3 method
-S3method(as.data.frame, SDMFrame)
+S3method(as.data.frame, InputFrame)
 
 export(
        barploterrbar,
@@ -28,7 +33,8 @@ export(
        elistWrite,
        errBarchart,
        SDMFrame,
-       readSDM)
+       readSDM,
+       ColMap)
 
 ## report auxilliary functions
 export(replaceVectorByEquality)
@@ -48,10 +54,11 @@ exportMethods(level,
               numberCt,
               numberNA,
               ddCtExpression,
-              errBarchart
+              errBarchart,
+              InputFrame
               )
 
-## mainly for SDMFrame
+## mainly for InputFrame
 exportMethods(coreData,
               "coreData<-",
               rightCensoring,

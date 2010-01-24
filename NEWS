@@ -1,3 +1,10 @@
+Release 0.99.9 (not finished yet, Rudi)
+Changes:
+    + (r42686) Add classes "InputFrame","InputReader","SDMReader", "CSVReader" and "ColMap" Not documented nor tested yet, therefore internal for now.
+    + (r42686) remove classes "SDMFrame" Not documented nor tested yet, therefore internal for now.
+    + (r42686) function "SDMFrame" is now Deprecated
+    + (r42686) function "readSDM" is now Defunct
+
 Release 0.99.9 (not finished yet, David)
 Changes:
     + (r42509) Add methods "replaceDetector", "replaceSample", "removeSample", "removeDetector". Not documented nor tested yet, therefore internal for now. 

@@ -32,7 +32,7 @@ setGeneric("numberCt", function(object,...) standardGeneric("numberCt"))
 setGeneric("numberNA", function(object,...) standardGeneric("numberNA"))
 
 ################################################################################
-## Class SDMFrame
+## Class InputFrame and InputReader
 ################################################################################
 
 setGeneric("detectorNames",function(object) standardGeneric("detectorNames"))
@@ -62,7 +62,6 @@ setGeneric("rightCensoring", function(object, threshold, value) standardGeneric(
 ## private
 setGeneric("ddCtExec",function(object, calibrationSample, housekeepingGenes, type, sampleInformation, toZero) standardGeneric("ddCtExec"))
 setGeneric("ddCtWithEExec",function(object, calibrationSample, housekeepingGenes,  type, sampleInformation, efficiencies, efficiencies.error) standardGeneric("ddCtWithEExec"))
-setGeneric("readCoreData",function(object) standardGeneric("readCoreData"))
 setGeneric("coreData", function(object) standardGeneric("coreData"))
 setGeneric("coreData<-", function(object, value) standardGeneric("coreData<-"))
 setGeneric("headtailPrint", function(object,...) standardGeneric("headtailPrint"))
@@ -71,3 +70,11 @@ setGeneric("headtailPrint", function(object,...) standardGeneric("headtailPrint"
 ## Visualization parameter
 ##----------------------------------------------------------------------------##
 setGeneric("exprsUndeterminedLabel", function(object) standardGeneric("exprsUndeterminedLabel"))
+
+################################################################################
+## Class InputReader
+################################################################################
+
+setGeneric("InputFrame",function(object) standardGeneric("InputFrame"))
+setGeneric("readRawData",function(object, file.name) standardGeneric("readRawData"))
+setGeneric("validate",function(object, file.name) standardGeneric("validate"))
