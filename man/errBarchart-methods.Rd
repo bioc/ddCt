@@ -11,7 +11,10 @@
   each panel represents one sample and the relative expression values of detectors (as
   well as their standard errors) are depicted as bars.
 
-  Detectors which are not determined are marked by grey NA.
+  Detectors which are not determined are marked by grey ND.
+
+  Two types of figures are supported: either condition on samples
+  (by="Sample") or on detectors (by="Detector").
 }
 \section{Methods}{
 \describe{

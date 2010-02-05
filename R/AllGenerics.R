@@ -16,7 +16,7 @@
 ## Class ddCtExpression
 ################################################################################
 
-setGeneric("errBarchart", function(object,...)	standardGeneric("errBarchart"))
+setGeneric("errBarchart", function(object,by,...)	standardGeneric("errBarchart"))
 setGeneric("elist", function(object,...) standardGeneric("elist"))
 setGeneric("elistWrite", function(object,file,...) standardGeneric("elistWrite"))
 

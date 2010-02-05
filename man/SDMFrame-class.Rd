@@ -1,25 +1,26 @@
-\name{SDMFrame-class}
+\name{InputFrame-class}
 \docType{class}
 \alias{SDMFrame-class}
-\alias{[,SDMFrame-method}
-\alias{[[,SDMFrame-method}
-\alias{$,SDMFrame-method}
-\alias{detectorNames<-,SDMFrame,character-method}
-\alias{detectorNames,SDMFrame-method}
-\alias{fileNames,SDMFrame-method}
-\alias{names,SDMFrame-method}
-\alias{sampleNames<-,SDMFrame,character-method}
-\alias{sampleNames,SDMFrame-method}
-\alias{uniqueDetectorNames<-,SDMFrame,character,character-method}
-\alias{uniqueDetectorNames<-,SDMFrame,missing,character-method}
-\alias{uniqueDetectorNames,SDMFrame-method}
-\alias{uniqueSampleNames<-,SDMFrame,character,character-method}
-\alias{uniqueSampleNames<-,SDMFrame,missing,character-method}
-\alias{uniqueSampleNames,SDMFrame-method}
-\alias{coreData,SDMFrame-method}
-\alias{coreData<-,SDMFrame,data.frame-method}
-\alias{Ct,SDMFrame-method}
-\alias{show,SDMFrame-method}
+\alias{InputFrame-class}
+\alias{[,InputFrame-method}
+\alias{[[,InputFrame-method}
+\alias{$,InputFrame-method}
+\alias{detectorNames<-,InputFrame,character-method}
+\alias{detectorNames,InputFrame-method}
+\alias{fileNames,InputFrame-method}
+\alias{names,InputFrame-method}
+\alias{sampleNames<-,InputFrame,character-method}
+\alias{sampleNames,InputFrame-method}
+\alias{uniqueDetectorNames<-,InputFrame,character,character-method}
+\alias{uniqueDetectorNames<-,InputFrame,missing,character-method}
+\alias{uniqueDetectorNames,InputFrame-method}
+\alias{uniqueSampleNames<-,InputFrame,character,character-method}
+\alias{uniqueSampleNames<-,InputFrame,missing,character-method}
+\alias{uniqueSampleNames,InputFrame-method}
+\alias{coreData,InputFrame-method}
+\alias{coreData<-,InputFrame,data.frame-method}
+\alias{Ct,InputFrame-method}
+\alias{show,InputFrame-method}
 
 %% currently SDMFrame only
 \alias{fileNames}
@@ -39,23 +40,23 @@
 %% replace and remove
 \alias{removeDetector}
 \alias{removeDetector-methods}
-\alias{removeDetector,SDMFrame,character-method}
+\alias{removeDetector,InputFrame,character-method}
 \alias{removeSample}
 \alias{removeSample-methods}
-\alias{removeSample,SDMFrame,character-method}
+\alias{removeSample,InputFrame,character-method}
 \alias{replaceDetector}
 \alias{replaceDetector-methods}
-\alias{replaceDetector,SDMFrame,character,character-method}
+\alias{replaceDetector,InputFrame,character,character-method}
 \alias{replaceSample}
 \alias{replaceSample-methods}
-\alias{replaceSample,SDMFrame,character,character-method}
+\alias{replaceSample,InputFrame,character,character-method}
 
 \title{Working with SDM files}
-\description{ The class SDMFrame provides core functionalities to read
+\description{ The class InputFrame provides core functionalities to read
   gene and sample information from SDM files and calculate them with a
   ddCt algorithm.
 
-  The function \code{SDMFrame} reads the data given in the colums
+  The function \code{InputFrame} reads the data given in the colums
   'Detector','Sample' and 'Ct' of the specified SDM output files and
   stores them as a data.frame. An additional column including the
   respective filename is added.
@@ -72,74 +73,74 @@
 }
 \section{Methods}{
   \describe{
-    \item{[,[[,\$}{\code{signature(x = "SDMFrame")}: primitive
-  accessors. Returns an object of \code{SDMFrame-class} with the subset data.
+    \item{[,[[,\$}{\code{signature(x = "InputFrame")}: primitive
+  accessors. Returns an object of \code{InputFrame-class} with the subset data.
     }
-    \item{names}{\code{signature(x = "SDMFrame")}: returns the column
+    \item{names}{\code{signature(x = "InputFrame")}: returns the column
       names in this SDM object
     }
-    \item{ddCtExpression}{\code{signature(object = "SDMFrame")}: runs
+    \item{ddCtExpression}{\code{signature(object = "InputFrame")}: runs
       a ddCt algorithm with this SDM object and returns a object of
       class \code{\linkS4class{ddCtExpression}}
     }
-    \item{fileNames}{\code{signature(object="SDMFrame")}: returns the
+    \item{fileNames}{\code{signature(object="InputFrame")}: returns the
       source SDM file names.
     }
-    \item{detectorNames}{\code{signature(object = "SDMFrame")}: returns
+    \item{detectorNames}{\code{signature(object = "InputFrame")}: returns
       the detector names in this SDM object
     }
-    \item{detectorNames<-}{\code{signature(object = "SDMFrame", value =
+    \item{detectorNames<-}{\code{signature(object = "InputFrame", value =
 	"character")}: replaces the detector names in this SDM object
     }
-    \item{sampleNames}{\code{signature(object = "SDMFrame")}: returns
+    \item{sampleNames}{\code{signature(object = "InputFrame")}: returns
       the sample names in this SDM object
     }
-    \item{sampleNames<-}{\code{signature(object = "SDMFrame", value =
+    \item{sampleNames<-}{\code{signature(object = "InputFrame", value =
 	"character")}:  replaces the sample names in this SDM object
     }
-    \item{uniqueDetectorNames}{\code{signature(object = "SDMFrame")}:
+    \item{uniqueDetectorNames}{\code{signature(object = "InputFrame")}:
       returns a vector of unique detector names in this SDM object
     }
-    \item{uniqueDetectorNames<-}{\code{signature(object = "SDMFrame",
+    \item{uniqueDetectorNames<-}{\code{signature(object = "InputFrame",
 	 target = "missing", value = "character")}:  replaces all detector
       names given by the 'names' attribute in 'value' with new detector
       names
     }
-    \item{uniqueDetectorNames<-}{\code{signature(object = "SDMFrame",
+    \item{uniqueDetectorNames<-}{\code{signature(object = "InputFrame",
 	target = "character", value = "character")}:  replaces all detector
       names given by 'target' with new detector names
     }
-    \item{uniqueSampleNames<-}{\code{signature(object = "SDMFrame",
+    \item{uniqueSampleNames<-}{\code{signature(object = "InputFrame",
 	 target = "missing", value = "character")}: replaces all sample
       names given by the 'names' attribute in 'value' with new sample
       names
     }
-    \item{uniqueSampleNames<-}{\code{signature(object = "SDMFrame",
+    \item{uniqueSampleNames<-}{\code{signature(object = "InputFrame",
 	target = "character", value = "character")}: replaces all sample
       names given by 'target' with new sample names
     }
-    \item{uniqueSampleNames}{\code{signature(object = "SDMFrame")}:
+    \item{uniqueSampleNames}{\code{signature(object = "InputFrame")}:
       returns a vector of unique sample names in this SDM object
     }
-    \item{removeSample}{\code{signature(object = "SDMFrame", sample="character")}:
-      removes the sample(s) specified from the SDMFrame object
+    \item{removeSample}{\code{signature(object = "InputFrame", sample="character")}:
+      removes the sample(s) specified from the InputFrame object
     }
-    \item{replaceDetector}{\code{signature(object = "SDMFrame",
+    \item{replaceDetector}{\code{signature(object = "InputFrame",
 	target="character", value="character")}:
       replace the detectors equal to the target with the value. Both
       \code{target} and \code{value} can be vectors of the same length,
       then the replace takes place iteratively.
     }
-    \item{replaceSample}{\code{signature(object = "SDMFrame",
+    \item{replaceSample}{\code{signature(object = "InputFrame",
 	target="character", value="character")}:
       replace the samples equal to the target with the value. Both
       \code{target} and \code{value} can be vectors of the same length,
       then the replace takes place iteratively.
     }
-    \item{show}{\code{signature(object="SDMFrame")}: pretty print of the
-      SDMFrame instance.
+    \item{show}{\code{signature(object="InputFrame")}: pretty print of the
+      InputFrame instance.
     }
-    \item{rightCensoring}{\code{signature(object="SDMFrame",
+    \item{rightCensoring}{\code{signature(object="InputFrame",
 	threshold="numeric")}: Right censoring the Ct value,  which
       targets the data points above a certain value
       (\code{threshold}). High Ct values (higher than 40 or 45 by the rule
@@ -148,13 +149,13 @@
       set the value above the threshold as \code{NA} (by default) or a
       given value. See the example.
     }
-    \item{coreData}{\code{signature(object="SDMFrame")}: returns the
+    \item{coreData}{\code{signature(object="InputFrame")}: returns the
       data frame read from SDM file.
     }
-    \item{coreData<-}{\code{signature(object="SDMFrame")}: replace the
+    \item{coreData<-}{\code{signature(object="InputFrame")}: replace the
       data frame read from SDM file.
     }
-    \item{Ct}{\code{signature(object="SDMFrame")}: returns the Ct value
+    \item{Ct}{\code{signature(object="InputFrame")}: returns the Ct value
       of the SDM file.
     }
   }
@@ -162,7 +163,7 @@
 \author{ Rudolf Biczok \email{mailto:r.biczok@dkfz.de}, Jitao David
   Zhang \email{mailto:j.zhang@dkfz.de}}
 \seealso{
-  \code{\link{SDMFrame}} function reads in data from SDM
+  \code{\link{InputFrame}} function reads in data from SDM
   files. Data from SDM files is used to construct
   \code{\linkS4class{ddCtExpression}} objects to analyze differetial expression.
 }

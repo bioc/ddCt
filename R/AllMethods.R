@@ -18,10 +18,16 @@
 ##----------------------------------------##
 ## errBarchart
 ##----------------------------------------##
-setMethod("errBarchart", "ddCtExpression", 
-          definition = function(object,...) {
+setMethod("errBarchart", c("ddCtExpression", "missing"),
+          definition = function(object, by,...) {
             res <- elist(object)
-            ddCtErrBarchart(res,...)
+            ddCtErrBarchart(res,by="Sample",...)
+          })
+
+setMethod("errBarchart", c("ddCtExpression", "character"),
+          definition = function(object, by, ...) {
+            res <- elist(object)
+            ddCtErrBarchart(res,by=by, ...)
           })
 
 ##----------------------------------------##

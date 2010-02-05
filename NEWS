@@ -4,6 +4,8 @@ Changes:
     + (r42686) remove classes "SDMFrame" Not documented nor tested yet, therefore internal for now.
     + (r42686) function "SDMFrame" is now Deprecated
     + (r42686) function "readSDM" is now Defunct
+    + Modify the errBarchart method to support lattice either conditional on the samples or the detectors
+    + Change out-dated documents (on-going)
 
 Release 0.99.9 (not finished yet, David)
 Changes:

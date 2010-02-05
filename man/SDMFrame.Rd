@@ -4,15 +4,15 @@
 \title{Read an SDM file}
 \description{Read an SDM file: Data Output File for SDS, Version 2.1}
 \usage{
-  SDMFrame(files)
-  readSDM(files)
+  SDMFrame(file)
+  readSDM(file)
 }
 \arguments{
-  \item{files}{Character vector of filenames}
+  \item{file}{Character vector of filenames}
 }
 
 \details{This function reads the data given in the colums
-  'Detector','Sample' and 'Ct' of the specified SDM output files and
+  'Detector','Sample' and 'Ct' of the specified SDM output file(s) and
   stores them as a data.frame. An additional column including the
   respective filename is added.
 
