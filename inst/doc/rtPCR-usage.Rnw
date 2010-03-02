@@ -102,7 +102,7 @@ sample $A$. This value is used for the \emph{t-test} and the \emph{Wilcoxon test
 all reference samples) is subtracted from the corresponding  $dC_T$ value of
 $Gene1$ and a sample $B$. This is called the $ddC_T$ value for $Gene1$ and sample $B$.}
 \item{The transformation $x \rightarrow 2^{-x}$ is applied to each $ddC_T$
-value. The resulting value is called 'level'.}
+value. The resulting value is called 'exprs' (used to be named as 'level', these two words are exchangable in this document).}
 \end{enumerate}
 %
 
