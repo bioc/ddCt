@@ -33,6 +33,7 @@ export(
        elistWrite,
        errBarchart,
        SDMFrame,
+       CSVFrame,
        readSDM,
        ColMap)
 

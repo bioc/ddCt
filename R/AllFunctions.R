@@ -68,8 +68,15 @@ replaceVectorByEquality <- function(vector, target, value) {
 #}
 
 SDMFrame <- function(file) {
-#  .Deprecated("InputFrame",package="ddCt");
   return(InputFrame(new("SDMReader",files=file)))
+}
+
+
+CSVFrame <- function(file, colmap) {
+  if(!missing(colmap))
+    return(InputFrame(new("CSVReader",files=file,colmap=colmap)))
+  else
+    return(InputFrame(new("CSVReader",files=file)))
 }
 
 ColMap <- function(...) {

@@ -895,7 +895,8 @@ setMethod("readRawData", signature(object="SDMReader",file.name="character"),
 setMethod("initialize", "CSVReader",
           function(.Object, files, colmap) {
             .Object@files <- files
-            .Object@colmap <- colmap
+            if(!missing(colmap))
+              .Object@colmap <- colmap
             return(.Object)
           })
 
