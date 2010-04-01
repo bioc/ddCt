@@ -1,6 +1,8 @@
 \name{SDMFrame}
 \alias{SDMFrame}
 \alias{readSDM}
+\alias{InputFrame,InputReader-method}
+\alias{rightCensoring,InputFrame,numeric-method}
 \title{Read an SDM file}
 \description{Read an SDM file: Data Output File for SDS, Version 2.1}
 \usage{

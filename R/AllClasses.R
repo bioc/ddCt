@@ -71,7 +71,9 @@ setClass("InputFrame",
 ##----------------------------------------------------------------------------##
  
 setClass("InputReader",
-         representation(files="character",colmap="ColMap","VIRTUAL")
+         representation(files="character",
+                        colmap="ColMap"),
+         contains=c("VIRTUAL")
          )
 
 ##----------------------------------------------------------------------------##

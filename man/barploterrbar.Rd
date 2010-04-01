@@ -15,10 +15,11 @@ par("cex.axis"),zeroForNA=TRUE,legend=FALSE,groups = NULL, order=FALSE, ...)
   \item{errcol}{Color of the error bars.}
   \item{horiz}{Logical. As in \code{\link[graphics:barplot]{barplot}}.}
   \item{w}{Size of the error bar ticks.}
-  \item{theCut}{}
-  \item{columnForDiffBars}{}
-  \item{zeroForNA}{}
-  \item{cex.axis}{}
+  \item{theCut}{The cut value}
+  \item{columnForDiffBars}{Whether the matrix should be transposed (by
+    default the rows are for diff bars)}
+  \item{zeroForNA}{Draw 0 instead of NA}
+  \item{cex.axis}{Axis font cex}
   \item{legend}{Sould a legend be plotted ?}
   \item{groups}{a factor - if specified the bars are collored according
     to the group they belong to}

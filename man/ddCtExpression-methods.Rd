@@ -3,6 +3,7 @@
 \alias{ddCtExpression}
 \alias{ddCtExpression-methods}
 \alias{ddCtExpression,SDMFrame-method}
+\alias{ddCtExpression,InputFrame-method}
 \title{Apply the ddCt algorithm for a given data set}
 \description{Apply the ddCt algorithm for a given data set}
 \section{usage}{
@@ -39,8 +40,8 @@
 }
 \section{Methods}{
   \describe{
-    \item{object = "SDMFrame"}{ An object of \code{\linkS4class{SDMFrame}},
-      constructed with the method \code{\link{SDMFrame}}
+    \item{object = "InputFrame"}{ An object of \code{\linkS4class{InputFrame}},
+      constructed with the method \code{\link{InputFrame}}
     }
   }
 }
@@ -50,7 +51,7 @@
   Methods, Vol. 25, No. 4. (December 2001), pp. 402-408
 }
 \seealso{
-  \code{\linkS4class{SDMFrame}}: reader for SDM files
+  \code{\linkS4class{InputFrame}}: reader for SDM files
   \code{\linkS4class{ddCtExpression}}:  representation for ddCt
   calculated expressions
 }

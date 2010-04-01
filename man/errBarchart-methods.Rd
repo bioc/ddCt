@@ -2,7 +2,8 @@
 \docType{methods}
 \alias{errBarchart}
 \alias{errBarchart-methods}
-\alias{errBarchart,ddCtExpression-method}
+\alias{errBarchart,ddCtExpression,missing-method}
+\alias{errBarchart,ddCtExpression,character-method}
 \title{ Draw barchart of relative expression level with error-bars}
 \description{
   Draw barchart (with error-bars) of relative expression level
@@ -18,7 +19,7 @@
 }
 \section{Methods}{
 \describe{
-\item{object = "ddCtExpression"}{ An object of \code{ddCtExpression},
+\item{object = "ddCtExpression", by="character"}{ An object of \code{ddCtExpression},
   constructed with the method \code{\link{ddCtExpression}}}
 }}
 \keyword{methods}

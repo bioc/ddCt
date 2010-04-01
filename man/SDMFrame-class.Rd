@@ -2,6 +2,7 @@
 \docType{class}
 \alias{SDMFrame-class}
 \alias{InputFrame-class}
+\alias{ColMap-class}
 \alias{[,InputFrame-method}
 \alias{[[,InputFrame-method}
 \alias{$,InputFrame-method}
@@ -21,6 +22,7 @@
 \alias{coreData<-,InputFrame,data.frame-method}
 \alias{Ct,InputFrame-method}
 \alias{show,InputFrame-method}
+
 
 %% currently SDMFrame only
 \alias{fileNames}
@@ -163,7 +165,7 @@
 \author{ Rudolf Biczok \email{mailto:r.biczok@dkfz.de}, Jitao David
   Zhang \email{mailto:j.zhang@dkfz.de}}
 \seealso{
-  \code{\link{InputFrame}} function reads in data from SDM
+  \code{\link{SDMFrame}} function reads in data from SDM
   files. Data from SDM files is used to construct
   \code{\linkS4class{ddCtExpression}} objects to analyze differetial expression.
 }

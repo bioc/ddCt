@@ -12,11 +12,11 @@ ddCtAbsolute(raw.table, addData, type = "mean", ADD = -30.234, DIV = -1.6268, sa
   \item{raw.table}{data frame. It must contain columns with the
     following names:'Ct','Sample','Detector','Platename'. The column
     'Ct' must contain numeric values. }
-  \item{addData}{}
+  \item{addData}{add data}
   \item{type}{character of length 1. `mean` or `median`- which method should be used for the
     aggregation of the repicates }
-  \item{ADD}{  }
-  \item{DIV}{  }
+  \item{ADD}{Add constant}
+  \item{DIV}{Div constant}
   \item{sampleInformation}{ if specified it must be an object of class
     \code{phenoData} with a column named 'Sample'. }
   \item{toZero}{boolean - if there is only one replication should the error be
