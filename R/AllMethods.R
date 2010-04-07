@@ -207,7 +207,8 @@ setAs(from="InputFrame", to="data.frame", def=function(from) {
 })
 
 setAs(from="data.frame", to="InputFrame", def=function(from) {
-  return(new("InputFrame",from))
+  ## TODO: add check columns
+  return(new("InputFrame",from, file.name=as.character(NA)))
 })
 
 ### S3 methods
