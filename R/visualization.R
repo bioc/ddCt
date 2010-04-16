@@ -69,14 +69,14 @@ ddCtErrBarchart <- function(x, by=c("Sample", "Detector"),
   if(all(is.na(x$exprs)))
     stop("All expressions are NA!\n")
   
-  x$Var2 <- factor(as.character(x$Var2))
-  x$Var1 <- factor(as.character(x$Var1))
+  x$Sample <- factor(as.character(x$Sample))
+  x$Detector <- factor(as.character(x$Detector))
 
   by <- match.arg(by, choices=c("Sample", "Detector"))
   if(by=="Sample") {
-    formula <- as.formula("exprs + level.err ~ Var2 | Var1")
+    formula <- as.formula("exprs + level.err ~ Sample | Detector")
   } else  {
-    formula <- as.formula("exprs + level.err ~ Var1 | Var2")
+    formula <- as.formula("exprs + level.err ~ Detector | Sample")
   }
   barchart(formula, data=x, 
            scales=list(x=list(rot=rot), y=list(alternating=1, at=seq(0, thr, 0.5))),

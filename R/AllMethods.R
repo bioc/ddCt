@@ -48,7 +48,7 @@ setAs(from="ddCtExpression",to="data.frame",
           return(aD)
         } else {
           stopifnot(is.list(aD))
-          a <- data.frame(expand.grid(featureNames(from), sampleNames(from)))
+          a <- data.frame(expand.grid(Detector=featureNames(from), Sample=sampleNames(from)))
           b <- colnames(a)
           for (i in 1:length(aD)) {
             a <- cbind(a, as.vector(aD[[i]]))
