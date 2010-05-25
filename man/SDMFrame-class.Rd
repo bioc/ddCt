@@ -21,6 +21,8 @@
 \alias{coreData,InputFrame-method}
 \alias{coreData<-,InputFrame,data.frame-method}
 \alias{Ct,InputFrame-method}
+\alias{Ct<-}
+\alias{Ct<-,InputFrame,numeric-method}
 \alias{show,InputFrame-method}
 
 
@@ -160,6 +162,8 @@
     \item{Ct}{\code{signature(object="InputFrame")}: returns the Ct value
       of the SDM file.
     }
+    \item{Ct}{\code{signature(object="InputFrame", value="numeric")}:
+      replace the Ct value in the object with the new values, and return the object.}
   }
 }
 \author{ Rudolf Biczok \email{mailto:r.biczok@dkfz.de}, Jitao David
