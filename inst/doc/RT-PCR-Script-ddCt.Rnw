@@ -1,0 +1,947 @@
+% NOTE -- ONLY EDIT THE .Rnw FILE!!!  The .tex file is
+% likely to be overwritten.
+%
+% \VignetteIndexEntry{How to apply the ddCt method}
+%\VignetteDepends{Biobase,ddCt, RColorBrewer, lattice, xtable}
+%\VignetteKeywords{taqman, ddCt}
+%\VignettePackage{none}
+\documentclass[12pt]{article}
+
+\usepackage{times}
+\usepackage{hyperref}
+
+\usepackage[authoryear,round]{natbib}
+\usepackage{times}
+\usepackage{comment}
+
+\textwidth=6.2in
+\textheight=8.5in
+%\parskip=.3cm
+\oddsidemargin=.1in
+\evensidemargin=.1in
+\headheight=-.3in
+
+\newcommand{\scscst}{\scriptscriptstyle}
+\newcommand{\scst}{\scriptstyle}
+\newcommand{\Rfunction}[1]{{\texttt{#1}}}
+\newcommand{\Robject}[1]{{\texttt{#1}}}
+\newcommand{\Rpackage}[1]{{\textit{#1}}}
+\newcommand{\Rclass}[1]{{\textit{#1}}}
+
+
+\bibliographystyle{plainnat}
+
+\begin{document}
+\title{The analysis of rtPCR data}
+\author{Jitao David Zhang, Markus Ruschhaupt}
+\maketitle
+
+With the help of this document, an analysis of rtPCR data can be
+performed. For this, the user has to specify several parameters described
+below in the '.Rnw' version of this document. After that the software R can be
+used for the analysis by processing the '.Rnw' version. In the beginning you will find a
+short description of the calculated values. After that the parameters that
+have to be specified are explained. 
+
+\section{The calculated values}
+
+Several values are calculated during the execution of this document. Some of
+them are explained here. The values explained here are calculated if no efficiencies are used (see below). 
+
+\begin{enumerate}
+\item{The mean or median of the replicates for one gene/sample combination is the Ct value.}
+\item{For a sample $A$ the Ct value of the housekeeping gene (or the median of the Ct values of
+all housekeeping genes) is subtracted from the corresponding Ct value of a gene $Gen1$. The result is the dCt value for $Gen1$ and sample $A$. This value is used for the t-test and the
+Wilcoxon test.}
+\item{For a gene $Gen1$ the dCt value of the reference sample (or the mean of the dCt values of
+all reference samples) is subtracted from the corresponding  dCt value of
+$Gen1$ and a sample $B$. This is called the ddCt value for $Gen1$ and sample $B$.}
+\item{The transformation $x \rightarrow 2^{-x}$ is applied to each ddCt
+value. The resulting value is called 'level'.}
+\end{enumerate}
+%
+Additionally, for each value an error is calculated. This is based on the
+standard error of the mean if the mean is used to summarize the triplets. If
+the median is used for summarization of the individual Ct values, the MAD divided by the square root of all samples is
+used as an error estimate.
+
+
+
+<<setup,echo=FALSE,results=hide>>= 
+options(width=50)
+@
+
+\section{Preparation}
+
+The following programs and packages have to be installed on the system. 
+\begin{itemize}
+\item R (at least version 2.2.0)
+\item R package Biobase (at least version 1.7)
+\item R package RColorBrewer
+\item R package ddCt
+\item R package lattice
+\item R package xtable
+\end{itemize}
+
+
+In case of using this manuscript first time, you have to install the
+\Rpackage{ddCt} package. This process can be performed
+semi-automatically by copying the codes of the following section
+(titled \emph{ddCtInstall}), which will download the current version
+of \Rpackage{ddCt} (dependent on the version of your R program) and
+install it.
+
+<<ddCtInstall, eval=FALSE, echo=TRUE>>=
+source("http://www.bioconductor.org/biocLite.R")
+biocLite(ddCt)
+@ 
+
+To run this document and perform
+the analysis you need a tab-delimited text file containing the individual Ct values of your experiment. This file
+can be exported from the software used to measure the Ct values. It is
+important that you export the individual Ct values (normally the software
+combines the replicates of the measurements to one value). After you have
+done this, you can follow this instruction step by step and set the appropriate parameters.
+
+
+\section{Choice of the parameters}
+
+First you have to specify the directory where your data is stored (load.path) and the
+directory where the results are supposed to be stored (save.path). You can specify the
+path relatively to the directory you are in when starting the script in R. 
+
+<<specifyFiles,results=hide>>=
+load.path = "."
+save.path = "."
+@
+
+Then you have to specify the name of the file containing the individual Ct values
+(Ct.data.file.name). Additionally, you may specify a file containing
+additional data related to the samples (sample.annotation.file.name). 
+This should be a tab-delimited text file with several columns and one row for
+each sample. Have a look at the example 'SampleAnno.txt'. The first column
+has to include the sample names and has to be named 'Sample'. 
+
+A file with additional information is important if you
+want to perform a t-test, if you use special colors for groups of samples, or if you want the samples to be grouped according
+to one column of the sample annotation file that can be specified through the parameter
+column.for.grouping. If all of this is not important to you, just
+set all parameters to 'NULL'. This also holds for other parameters described
+below that may be specifies but do not have to. If you do not want to specify
+such a parameter, just put 'NULL' there. If you have a sample annotation file
+and want to include only samples from this file into your final object, you
+can set the parameter 'useOnlySamplesFromAnno'.
+
+<<The Data>>=
+
+Ct.data.file.name       <-  c("")
+
+sample.annotation.file.name  <- NULL
+column.for.grouping          <- NULL
+useOnlySamplesFromAnno       <- FALSE
+@
+
+In case no input file was specified, a default file will be used for the demonstrative purpose.
+
+%--------------------------------
+\subsection*{Change gene names and sample names}
+%--------------------------------
+
+You may change gene names and sample names, which is 
+important for the final plot of your data. If you change gene/sample names you
+also change the ordering of the genes/samples in your plot.
+
+In this example, 'Gen1' will become 'Gene A', 'Gen4' will become 'Gene B', and
+so on. In the final plot, Gene A will be plotted first, then Gene B followed by
+Gene C, HK1 and HK2. If you want to rename genes, {\bf all} genes have to be
+included into this list. You cannot exclude genes that you do not want to be renamed.
+The sample names may be changed in the same way. 
+
+<<transform>>=
+#new.gene.names    <- c("Gen1"="Gene A",
+#		        "Gen4"="Gene B",
+#			"Gen5"="Gene C",
+#			"Gen2"="HK1",
+#			"Gen3"="HK2")
+new.gene.names    <- NULL
+new.sample.names  <- NULL
+@
+
+\noindent {\bf Attention:} If you rename genes or samples, the new names must be
+used for the parameters further down below. 
+
+%--------------------------------
+\subsection*{Housekeeping genes and reference samples}
+%--------------------------------
+
+Here you have to specify the housekeeping gene(s) and the reference
+sample(s). In this example, one reference sample and two housekeeping
+genes are used. If more than one object is specified, the names have to be given as
+shown in this example.
+If you specify more than one housekeeping gene, the algorithm will use the mean
+of the Ct values of the housekeeping genes for normalization. If you use more
+than one sample, the algorithm uses the mean of the chosen samples as the
+reference line. 
+
+<<housekeeping>>=
+name.referenz.sample <- c("Sample2")
+name.referenz.gene   <- c("Gene3")
+@
+
+
+You may set a threshold for the Ct values. All individual Ct values values above this
+threshold will be treated as 'undetermined'. 
+<<threshold>>=
+Threshold.for.Ct <- 40
+@
+
+Here you have to specify if you want to use the 'mean' or the 'median' for merging the individual Ct values for a gene/sample combination.
+The median is often more appropriate because it is more robust.
+<<mean/median>>=
+TYPEOFCALCULATION <- "mean"
+@
+
+
+%--------------------------------
+\subsection*{Efficiencies}
+%--------------------------------
+
+\noindent You may include efficiencies for each gene. There is also the possibility to include error estimates for the
+efficiencies (for example a standard deviation). These estimates will be used for the
+error calculation. These efficiencies can be specified in the following way.
+
+
+<<eff, eval=FALSE>>=
+EFFICIENCIES <- c("Gene A"=1.9,"Gene B"=1.8,"HK1"=2,"Gene C"=2,"HK2"=2)
+EFFICIENCIES.ERROR <- c("Gene A"=0.01,"Gene B"=0.1,"HK1"=0.05,"Gene C"=0.01,"HK2"=0.2)
+@
+
+\noindent If you use efficiencies, only the raw Ct value and the final 'level' is
+calculated. There are no 'dCt' or 'ddCt' values. Hence no t-test can
+be performed if efficiencies are used. In this example we do not use efficiencies.
+
+<<effizienzen>>=
+EFFICIENCIES <- NULL
+@
+
+<<eff.error>>=
+EFFICIENCIES.ERROR <- NULL
+@
+
+
+%--------------------------------
+\subsection*{Plot parameter}
+%--------------------------------
+
+The following parameters are used to change the final plot. First you have to
+specify what you want to plot. Here you can specify any or both of the
+following two choices:
+\begin{itemize}
+\item level - For each gene and sample the relative expression to the reference
+line is plotted
+\item Ct - the raw, unnormalized but merged Ct values are plotted
+\end{itemize}
+
+<<PlotKind>>=
+TheKindOfPlot <- c("level","Ct")
+@
+
+
+Sometimes genes and/or samples are not wanted to be included in the final plot. And
+sometimes you only want to include a small fraction of genes and/or samples.
+Have a look at the examples. We do not want the "NTC" sample to appear in
+the plot:
+%
+% Example 1
+% names.of.the.samples.REMAIN.in.Output <- c("293","ACHN","CAKI 1","CAKI2","Reference")
+% Here only the samples "293","ACHN","CAKI 1","CAKI2","Reference" will be
+% included in the final plot
+%
+%
+% Example 2
+%
+% names.of.the.genes.REMAIN.in.Output   <- NULL
+% names.of.the.genes.NOT.in.Output      <- c("Gen1","Gen3")
+% Here only "Gen1" and "Gen3" will be removed from the final plot
+%
+
+<<remaining>>=
+#REMAIN
+names.of.the.genes.REMAIN.in.Output   <- NULL
+names.of.the.samples.REMAIN.in.Output <- NULL
+#NOT
+names.of.the.genes.NOT.in.Output      <- NULL
+names.of.the.samples.NOT.in.Output    <- NULL
+@
+
+
+Now you have to consider the following questions: 
+Do you want the final plot to be drawn in a way such that the samples are plotted next to
+each other ? 
+
+<<grouping>>=
+GROUPINGBYSAMPLES <- TRUE
+@
+
+\noindent And would you like each gene or sample to have its own
+plot? 
+
+<<plot0>>=
+own.plot.for.each.object     <- TRUE
+@
+
+
+\noindent This is often useful if you have
+many genes or samples. Depending on the parameter GROUPINGBYSAMPLES either
+each gene (GROUPINGBYSAMPLES=TRUE) will have its own plot, or each sample 
+( GROUPINGBYSAMPLES = FALSE) will have its own plot.
+
+
+If you have a single plot for each individual gene, then you may color the
+sample bars according to one parameter of your sample annotation file (if you
+have specified such a file in the beginning of this script). You may also specify
+the colors.
+
+<<plot1>>=
+GroupingForPlot <- NULL
+GroupingColor   <- c("#E41A1C","#377EB8","#4DAF4A","#984EA3","#FF7F00")
+@
+
+You may specify a CUTTOFF for the y axis for all plots. Then all plots have the
+same scale. 
+<<plot2>>=
+CUTOFF <- NULL
+@
+
+With the parameter BREWERCOL you can specify color sets you want to use in order to
+color the individual bars. For additional information have a look at the
+description of the 'RColorBrewer' package.
+
+<<plot3>>=
+BREWERCOL <- c("Set3","Set1","Accent","Dark2","Spectral","PuOr","BrBG")
+@
+
+Would you like to plot a legend? (TRUE/FALSE). Sometimes the
+plot will be messed up if a legend is plotted, so please have a try.
+
+<<plot4>>=
+LEGENDE <- TRUE
+@
+
+%--------------------------------
+\subsection*{t-test and Wilcoxon test  specification}
+%--------------------------------
+
+You may perform a t-test and a Wilcoxon test if you have specified a sample
+annotation file above. {\bf Attention:} A t-test and a Wilcoxon test will not work if efficiencies are used for
+the calculation.
+<<ttest1>>=
+perform.ttest <- FALSE
+@
+
+
+If you want to do a t-test/Wilcoxon test, you have to specify the name of the
+column of your sample information file that includes the group information needed for the tests. If there are
+more than two groups in this column, tests for each possible pair of groups
+are performed.
+
+<<ttest>>=
+column.for.ttest <- NULL
+@
+
+If you want to perform a paired t-test/Wilcoxon test, you have to specify a column of your
+sample information file that contains information describing the pairing of
+the samples. A pair of samples must have the same number/parameter in that
+column. Please have a look at the example.
+
+<<ttest3>>=
+column.for.pairs     <- NULL      ## ansonsten NULL
+@
+
+You can specify whether you want to exclude some samples 
+from the t-test. Here we again want to exclude the 'NTC' sample.
+<<ttest4>>=
+names.of.the.samples.REMAIN.in.ttest <- names.of.the.samples.REMAIN.in.Output
+names.of.the.samples.NOT.in.ttest    <- names.of.the.samples.NOT.in.Output
+
+@
+
+
+
+%------------------------------
+\subsection*{Housekeeping gene correlation}
+%------------------------------------------
+
+If two or more housekeeping genes are used, the correlation (Pearson and
+Spearman) for each pair of housekeeping genes is calculated. Additionally a
+plot is produced. You may specify some samples that are not supposed to be used for
+the correlation calculation, for example a no template control. In the default
+setting those samples are excluded that are also excluded from the plot.
+
+<<>>=
+names.of.the.samples.REMAIN.in.cor <- names.of.the.samples.REMAIN.in.Output
+names.of.the.samples.NOT.in.cor    <- names.of.the.samples.NOT.in.Output 
+@
+
+
+\noindent Now all parameters have been set. You have to start R, change the directory if you like, and then type the following:
+
+Sweave("rt\_PCR\_Skript\_ddCt\_X\_X.Rnw")
+
+\noindent The X might differ, depending on the version of this script. In the
+current example the script is  version '3\_0':
+
+Sweave("rt\_PCR\_Skript\_ddCt\_3\_0.Rnw")
+
+%
+%  ----------------------------------------------------------------------------
+%
+
+<<lib, echo=FALSE, results=hide>>=
+library(ddCt)
+@
+
+<<runastest, echo=FALSE, results=hide>>=
+## in case key parameters were not specified, the script runs in test mode
+testMode <- FALSE
+if (length(Ct.data.file.name) == 1 & Ct.data.file.name[1]=="")
+  testMode <- TRUE
+if(testMode) {
+  Ct.data.file.name <- "Experiment1.txt"
+  load.path <- system.file("extdata", package="ddCt")
+  name.referenz.sample <- c("Sample2")
+  name.referenz.gene   <- c("Gene3","Gene2")
+}
+@ 
+
+<<readData,results=hide,echo=FALSE>>=
+datadir <- function(x) file.path(load.path, x)
+savedir <- function(x) file.path(save.path,x)
+file.names <- datadir(Ct.data.file.name)
+sho <- paste(gsub(".txt","",Ct.data.file.name),collapse="_")
+
+warningFile <- savedir(paste("warning.output",sho,".txt",sep=""))
+
+CtData <- SDMFrame(file.names)
+
+if (!is.null(Threshold.for.Ct)){
+ A <- Ct(CtData)>= Threshold.for.Ct
+ coreData(CtData)$Ct[A] <- NA
+}
+
+if (! is.null(new.gene.names))   CtData[,2] <- new.gene.names[CtData[,2]]
+if (! is.null(new.sample.names)) CtData[,1] <- new.sample.names[CtData[,1]]
+
+
+
+if(! is.null(sample.annotation.file.name)){
+   info <- datadir(sample.annotation.file.name)
+   sampleInformation <- read.AnnotatedDataFrame(info,header=TRUE,sep="\t", row.names=NULL)
+ }else{
+   sampleInformation <- new("AnnotatedDataFrame",
+                            data=data.frame(Sample=sampleNames(CtData)),
+			    varMetadata=data.frame(labelDescription=c("unique identifier"),row.names=c("Sample")))
+ }
+
+ 
+ 
+
+if(useOnlySamplesFromAnno && !is.null(sample.annotation.file.name)){
+  A <- CtData[,"Sample"] %in% pData(sampleInformation)[,"Sample"]
+  warning( paste("Es werden folgende Samples entfernt:",paste(unique(CtData[!A,"Sample"]),collapse=", ")))
+  CtData <- CtData[A,]
+ }
+
+
+if (is.null(EFFICIENCIES)){
+  result <-      ddCtExpression(CtData,
+                      calibrationSample=name.referenz.sample,
+                      housekeepingGenes=name.referenz.gene,
+                      type=TYPEOFCALCULATION,
+                      sampleInformation=sampleInformation,
+                      warningStream=warningFile)
+  } else{
+  result <- ddCtwithE(CtData,
+                      calibrationSample=name.referenz.sample,
+                      housekeepingGenes=name.referenz.gene,  
+                      efficiencies=EFFICIENCIES,
+                      efficiencies.error=EFFICIENCIES.ERROR,
+                      type=TYPEOFCALCULATION,
+                      sampleInformation=sampleInformation,
+                      warningStream=warningFile)
+  }
+   
+save(result,file=savedir(paste("Result",sho,".RData",sep="")))
+@
+
+<<write (HTML)Tables,echo=FALSE,results=hide>>=
+htmlName   <- paste("HTML",sho,sep="_")
+tablesName <- paste("Tables",sho,sep="_")
+getDir <- function(dir, ...) {
+  if(!file.exists(dir)) {
+    dir.create(dir,...)
+  }
+  return(dir)
+}
+
+
+html.path <- getDir(file.path(save.path,htmlName))
+table.path <- getDir(file.path(save.path, tablesName))
+
+if(!is.null(sample.annotation.file.name) & !is.null(column.for.grouping))
+ {result<- result[,order(pData(result)[,column.for.grouping])]}
+
+elistWrite(result,file=savedir(paste("allValues",sho,".csv",sep="")))
+EE1 <- assayData(result)$exprs
+FF1 <- assayData(result)$level.err
+if(!is.null(GroupingForPlot)) 
+  GFP1 <- pData(result)[,GroupingForPlot]
+
+Ct  <- round(assayData(result)$Ct,2)
+lv  <- round(EE1,2)
+
+write.table(cbind(t(EE1),t(FF1)),file=file.path(table.path,"LevelPlusError.txt"),sep="\t",col.names=NA)
+write.table(lv,file=file.path(table.path,"level_matrix.txt"),sep = "\t", col.names = NA)
+write.table(Ct,file=file.path(table.path,"Ct_matrix.txt"),sep="\t", col.names = NA)
+
+write.htmltable(cbind(rownames(lv),lv),title="Level",file=file.path(html.path,"level"))
+write.htmltable(cbind(rownames(Ct),Ct),title="Ct",file=file.path(html.path,"Ct"))
+
+
+if(is.null(EFFICIENCIES)){
+ dCtValues  <- round(assayData(result)$dCt,2)
+ ddCtValues <- round(assayData(result)$ddCt,2)
+ write.table(dCtValues,file=file.path(table.path,"dCt_matrix.txt"),  sep="\t", col.names=NA)
+ write.table(ddCtValues,file=file.path(table.path,"ddCt_matrix.txt"),sep="\t",col.names=NA)
+
+ write.htmltable(cbind(rownames(dCtValues),dCtValues)  ,title="dCt",file=file.path(html.path,"dCt"))
+ write.htmltable(cbind(rownames(ddCtValues),ddCtValues),title="ddCt",file=file.path(html.path,"ddCt"))
+}
+
+@
+
+
+<<plot Level,echo=FALSE,results=hide>>=
+for(KindOfPlot in TheKindOfPlot){
+if(KindOfPlot=="level"){
+  EE1 <- assayData(result)$exprs
+  FF1 <- assayData(result)$level.err
+  theTitle <- "Level"
+}
+
+if(KindOfPlot=="ddCt"){
+  EE1 <- assayData(result)$ddCt
+  FF1 <- assayData(result)$ddCt.err
+  theTitle <- "ddCt"
+}
+
+if(KindOfPlot=="dCt"){
+  EE1 <- assayData(result)$dCt
+  FF1 <- assayData(result)$dCt.err
+  theTitle <- "dCt"
+}
+
+if(KindOfPlot=="Ct"){
+  EE1 <- assayData(result)$Ct
+  FF1 <- assayData(result)$Ct.err
+  theTitle <- "Ct"
+}
+
+
+
+################
+## order the set
+################
+
+if (!is.null(new.gene.names))
+ {EE2  <- EE1[match(new.gene.names,rownames(EE1)),,drop=FALSE]
+  FF2  <- FF1[match(new.gene.names,rownames(EE1)),,drop=FALSE]
+ } else{
+  EE2 <- EE1
+  FF2 <- FF1
+ }
+
+if (!is.null(new.sample.names))
+ {EE  <- EE2[,match(new.sample.names,colnames(EE2)),drop=FALSE]
+  FF  <- FF2[,match(new.sample.names,colnames(EE2)),drop=FALSE]
+  if(!is.null(GroupingForPlot)) GFP<- GFP1[match(new.sample.names,colnames(EE2))]
+ } else{
+  EE <- EE2
+  FF <- FF2
+  if(!is.null(GroupingForPlot)) GFP<- GFP1
+ }
+
+###################
+## Reducing the set
+###################
+
+
+if (!is.null(names.of.the.genes.REMAIN.in.Output)){
+   Gred <- (rownames(EE) %in% names.of.the.genes.REMAIN.in.Output)
+}else{
+   Gred <- !(rownames(EE) %in% names.of.the.genes.NOT.in.Output)
+}
+
+
+if (!is.null(names.of.the.samples.REMAIN.in.Output)){
+   Sred <- (colnames(EE) %in% names.of.the.samples.REMAIN.in.Output)
+}else{
+   Sred <- !(colnames(EE) %in% names.of.the.samples.NOT.in.Output)
+}
+
+EEN <- EE[Gred,Sred,drop=FALSE]
+FFN <- FF[Gred,Sred,drop=FALSE]
+if(!is.null(GroupingForPlot)) GFPN <- as.factor(as.character(GFP[Sred]))
+
+############
+# the color
+############
+
+COLORS <- c()
+for (i in 1:length(BREWERCOL))
+  COLORS <- c(COLORS,brewer.pal(brewer.pal.info[BREWERCOL[i],]$maxcolors,BREWERCOL[i]))
+if(GROUPINGBYSAMPLES){
+  THECO  <- COLORS[1:sum(Sred)]
+} else {
+  THECO  <- COLORS[1:sum(Gred)]
+}
+
+##########
+# plotting
+##########
+getFileName <- function(prefix="Ct", name) {
+  sprintf("%s_Result_%s.pdf", prefix, sho)
+}
+if(own.plot.for.each.object){
+ pdf(w=15,h=15,file=savedir(paste(theTitle,"Result",sho,".pdf",sep="")))
+if(GROUPINGBYSAMPLES){
+  for(k in 1:dim(EEN)[1]){
+    EENN <- EEN[k,,drop=FALSE]
+    FFNN <- FFN[k,,drop=FALSE]
+    barploterrbar(EENN,EENN-FFNN,EENN+FFNN,barcol=THECO,legend=LEGENDE,columnForDiffBars=GROUPINGBYSAMPLES,theCut=CUTOFF,ylab=theTitle)
+  }}else{
+    for(k in 1:dim(EEN)[2]){
+      EENN <- EEN[,k,drop=FALSE]
+      FFNN <- FFN[,k,drop=FALSE]
+      barploterrbar(EENN,EENN-FFNN,EENN+FFNN,barcol=THECO,legend=LEGENDE,columnForDiffBars=GROUPINGBYSAMPLES,theCut=CUTOFF,ylab=theTitle)
+    }}
+ if(GROUPINGBYSAMPLES & !is.null(GroupingForPlot)){
+   for(k in 1:dim(EEN)[1]){
+     EENN <- EEN[k,,drop=FALSE]
+     FFNN <- FFN[k,,drop=FALSE]
+     barploterrbar(EENN,EENN-FFNN,EENN+FFNN,barcol=GroupingColor,legend=LEGENDE,columnForDiffBars=GROUPINGBYSAMPLES,theCut=CUTOFF,ylab=theTitle,las=2,names.arg=colnames(EENN),main=rownames(EENN),groups=GFPN)
+   }}
+ dev.off()
+}else{
+  barploterrbar(EEN,EEN-FFN,EEN+FFN,barcol=THECO,legend=LEGENDE,las=2,columnForDiffBars=GROUPINGBYSAMPLES,theCut=CUTOFF,ylab=theTitle)
+  dev.copy(pdf,w=15,h=15,file=savedir(paste(theTitle,"Result",sho,".pdf",sep="")))
+  dev.off()}
+}
+result.bySample <- errBarchart(result)
+print(result.bySample)
+dev.print(pdf, getFileName("errbarplot_bySample_", sho), width=15, height=15)
+result.byDetector <- errBarchart(result, by="Detector")
+print(result.byDetector)
+dev.print(pdf, getFileName("errbarplot_byDetector_", sho), width=15, height=15)
+@
+\newpage
+
+\section{Results}
+
+Various files are created during the calculation process. The most important
+files are the following:
+\begin{itemize}
+\item A tab-delimited text file containing all calculated values for each gene/sample combination,
+e.g. Ct+error, dCt+error, ddCt+error, level+error. {\bf Name of
+the file:} 'allValues' followed by the name of the file containing the
+individual Ct values and extension.
+\item A .pdf file including the plots, either of the 'levels' or the raw Ct values (depending on your choice)
+{\bf Name of the file:} 'Level' or 'Ct' followed by 'Result', the name of the
+file containing the individual Ct values and the extension. In this example the name is 'LevelResultTest.pdf'.
+\item A tab-delimited text file containing the level and the error of the
+level. This file can be used in Excel to create own plots with error
+bars. {\bf Name of the file:} 'LevelPlusError' followed by the name of the
+file containing the individual Ct values and  extension.
+\item A tab-delimited text file containing the results from the t-test and the
+Wilcoxon test (if these tests have been performed). {\bf Name of the file:} 'ttest'
+followed by the name of the groups used in the test, followed by the name of
+the file containing the individual Ct values and extension. In this example we have: 'ttestG1G2Test.txt'.
+\item An R object containing all calculated values for each gene/sample combination, e.g. Ct+error,
+dCt+error, ddCt+error, level+error. Furthermore the object includes additional sample information.  {\bf Name of
+the file:} 'Result' followed by the name of the file containing the individual
+Ct values and extension. 
+
+\end{itemize}
+There are additional tab-delimited text files and .html files containing
+'Ct','dCt', 'ddCt' and 'level' information. All this information is also
+included in the  'allValues' file, but in a different format.
+
+% The result of the housekeeping correlation calculation. One plot for each pair
+% of housekeeping genes. This plots appear only if you have more than one
+% housekeeping gene.
+
+\begin{figure}[htp]
+\begin{center}
+
+<<Korrelation,echo=FALSE,results=hide,fig=TRUE,width=15, height=15>>=
+A <- name.referenz.gene 
+if (length(A) > 1) { 
+ if (!is.null(names.of.the.samples.REMAIN.in.cor)){
+   corRed <- (rownames(pData(result)) %in% names.of.the.samples.REMAIN.in.cor)
+ }else{
+   corRed <- !(rownames(pData(result)) %in% names.of.the.samples.NOT.in.cor)
+ }
+ result2 <- assayData(result[,corRed])$Ct
+
+ K <- combn(1:length(A),2)
+ U <- ncol(K)
+ par(mfrow=c(ceiling(sqrt(U)),ceiling(sqrt(U))))
+ for (i in 1:U){
+  Gen1 <- A[K[1,i]] # der Name des ersten Housekeepinggenes
+  Gen2 <- A[K[2,i]] # der Name des zweiten Housekeepinggenes
+  BART <- cor(result2[Gen1,],result2[Gen2,],use="pairwise.complete.obs")
+  if(!is.na(BART)) {
+    plot(result2[Gen1,],result2[Gen2,],xlab=Gen1,ylab=Gen2,pch="*",col="red", main=paste("Correlation:",round(BART,3)))
+  } else {
+    gen1.allna <- all(is.na(result2[Gen1,]))
+    warn <- sprintf("Correlation does not exist, since %s in all Samples are 'Undetermined'\n",ifelse(gen1.allna, Gen1, Gen2))
+
+    plot.new()
+    text(0.5,0.5, warn)
+  }
+  }} else{
+   if (!is.null(names.of.the.samples.REMAIN.in.cor)){
+   corRed <- (rownames(pData(result)) %in% names.of.the.samples.REMAIN.in.cor)
+ }else{
+   corRed <- !(rownames(pData(result)) %in% names.of.the.samples.NOT.in.cor)
+ }
+ result2 <- assayData(result[,corRed])$Ct
+  plot(result2[A,],pch="*",col="red", main="Expression HK Gene")
+ }
+@
+%
+\end{center}
+\caption{\label{Korrelation} Correlation of the housekeeping genes}
+\end{figure}
+
+
+<<TTest,echo=FALSE,results=hide>>==
+
+myFoldChange <- function(x){
+  x <- as.numeric(x)
+  if(length(x) == 2 ){
+    resu <- 2^(x[1]-x[2])
+  }else if( length(x) == 1  ){
+    resu <- 2^x
+  }else{
+    stop("unexpected situation in myFoldChange")
+  }
+  return(resu)
+}
+
+
+if(perform.ttest){
+ttestName   <- paste("tTests",sho,sep="_")
+ttest.path <- getDir(file.path(save.path, ttestName))
+
+if (!is.null(names.of.the.samples.REMAIN.in.ttest)){
+  ttestRed <- (rownames(pData(result)) %in% names.of.the.samples.REMAIN.in.ttest)
+}else{
+  ttestRed <- !(rownames(pData(result)) %in% names.of.the.samples.NOT.in.ttest)
+}
+
+
+result3 <- result[,ttestRed]
+
+
+daten  <- assayData(result3)$dCt # der t-Test wird immer mit den normalisierten Werten gemacht
+if( ! column.for.ttest %in% colnames(pData(result3)) )
+  stop(paste(" did not find :", column.for.ttest,": in pData ",sep=""))
+faktor <- as.character(pData(result3)[,column.for.ttest])
+mmm <- nlevels(as.factor(faktor))
+if( mmm == 1 ){
+  stop( " found only a single group for t-test ")
+}else if( mmm == 2 ){
+  aa <- matrix(c(1,2), ncol=1) # aa = die paarweisen Vergleiche
+}else{
+  aa <- combn(1:mmm,2)
+}
+
+ 
+for (k in 1:ncol(aa)){
+  
+  Groups  <- levels(as.factor(faktor))[aa[,k]]
+  subs    <- faktor %in%  Groups
+  datenS  <- daten[,subs]
+  faktorS <- as.factor(faktor[subs])  # hier wird gewaerleistet dass der neue Faktor genau zwei Elemente hat
+  
+  if( ! is.null(column.for.pairs) ){
+    if( ! column.for.pairs %in% colnames(pData(result)) )
+      stop(paste(" did not find :", column.for.pairs,": in pData ",sep=""))
+    paarungS <- as.character(pData(result3)[,column.for.pairs])
+    paarungS <- paarungS[subs]
+    wenigerRes <- 1
+    optTest <- "paired "
+  }else{
+    wenigerRes <- 0
+    optTest <- ""
+  }
+
+
+
+  res  <- matrix(NA,nrow=nrow(datenS),ncol=8-wenigerRes)
+  res2 <- matrix(NA,nrow=nrow(datenS),ncol=2-wenigerRes)
+
+  for (i in 1:nrow(datenS)){ 
+    a  <- datenS[i,]
+    b  <- is.na(a)
+    cc <- a[!b]
+    d  <- faktorS[!b]
+    if( ! is.null(column.for.pairs) ){ 
+      paar <- as.character(paarungS[!b])
+      ## restrict to valid pair data only
+      validPaarItems <- paar[duplicated(paar)]
+      valid <- which( as.character(paar) %in% validPaarItems )
+      paar <- paar[valid]
+      cc <- cc[valid]
+      d <- d[valid]
+      if(all(table(d) >1)) {
+        sel1 <- which(as.character(d) == Groups[1])
+        sel2 <- which(as.character(d) == Groups[2])
+        stopifnot( all( paar[sel1][order(paar[sel1])] ==paar[sel2][order(paar[sel2])] )   )
+        group1 <- cc[sel1][order(paar[sel1])]
+        group2 <- cc[sel2][order(paar[sel2])]
+        ff <- t.test(x=group1, y=group2, paired=TRUE)
+        ff2<- wilcox.test(x=group1, y=group2, paired=TRUE)
+      }else{
+        ff <- NULL
+        ff2 <- NULL
+      }
+    }else{
+      if(all(table(d)>1)) {
+        ff <- t.test(cc~d)
+        ff2<- wilcox.test(cc~d)
+      }else{
+        ff  <- NULL
+        ff2 <- NULL
+      }
+    }
+    if( !is.null(ff) ){
+      res[i,]  <-c(signif(ff$statistic),
+	           signif(ff$p.value),
+		   ff2$statistic,
+		   signif(ff2$p.value),
+		   myFoldChange(ff$estimate),
+                   ff$parameter["df"],
+                   ff$estimate)          ## 2 Stueck oder 1 Stueck (paired)
+      
+      res2[i,] <-c(names(ff$estimate))  ## 2 Stueck oder 1 Stueck (paired)
+     }
+  }
+  AllGe      <- rownames(assayData(result)$exprs)
+  theHKGenes <- rep("",length(AllGe))
+  theHKGenes[AllGe %in% name.referenz.gene] <- "X"
+  gg <- cbind(AllGe,theHKGenes,res)
+  
+   myColnames <- c("Name",
+		   "Housekeeping Gene",
+                   paste("statistic(", optTest,"t.test)", sep=""),
+                   paste("pvalue(",    optTest,"t.test)", sep=""),
+                   paste("statistic(", optTest,"Wilcox)", sep=""),
+                   paste("pvalue(",    optTest,"Wilcox)", sep=""),
+                   "foldChange",
+                   "degreeOfFreedom"
+                   )
+  
+  if( ! is.null(column.for.pairs) ){
+    Mr1 <- res2[,1]
+    extraName <- unique(Mr1[!is.na(Mr1)])
+    if( length(extraName) < 1 ){
+      extraName <- "fehlenUnklar"
+    }
+    myColnames <- c(myColnames, extraName) 
+  }else{
+    Mr1 <- res2[,1]
+    Mr2 <- res2[,2]
+    stopifnot(length(unique(Mr1[!is.na(Mr1)]))==1 & length(unique(Mr2[!is.na(Mr2)]))==1   )
+    myColnames <- c(myColnames,
+                    unique(Mr1[!is.na(Mr1)]),
+                    unique(Mr2[!is.na(Mr2)])
+                    ) 
+  }
+  
+  colnames(gg) <- myColnames
+  pVSpalte <- paste("pvalue(",    optTest,"t.test)", sep="")
+  gg <-gg[order(as.numeric(gg[,pVSpalte])),]
+  
+  SAVED <- paste("ttest",Groups[1],Groups[2],sep="")
+  write.table(gg,file=file.path(ttest.path, paste(SAVED,"txt",sep=".")),sep="\t",row.names=FALSE)
+  write.htmltable(gg,file=file.path(ttest.path,SAVED))
+}
+}
+@
+
+<<BoxplotsHousekkepingGenes,echo=FALSE>>=
+if(perform.ttest){
+ if (!is.null(names.of.the.samples.REMAIN.in.ttest)){
+   ttestRed <- (rownames(pData(result)) %in% names.of.the.samples.REMAIN.in.ttest)
+ }else{
+   ttestRed <- !(rownames(pData(result)) %in% names.of.the.samples.NOT.in.ttest)
+ }
+result3 <- result[,ttestRed]
+daten   <- assayData(result3)$Ct  # es geht ja hier um die Expressionen der
+				 # Housekeeping Gene vor Normalisierung
+faktor	<- as.character(pData(result3)[,column.for.ttest])
+mmm     <- levels(as.factor((faktor)))
+N <- length(mmm)
+
+daten2 <- daten[name.referenz.gene,,drop=FALSE] 
+BoxPl <- list()
+for (i in 1:N){
+ BoxPl[[i]] <- t(daten2[,mmm[i]==faktor])
+}
+
+res <- list()
+for(i in 1:length(name.referenz.gene)){
+ A <- lapply(BoxPl, function(x) x[,i])
+ names(A) <- rep(name.referenz.gene[i], N)
+ res      <- c(res,A)
+}
+
+theColor <- 2 + (1:N)
+pdf(file=savedir(paste("HKGenesPerGroup_",sho,".pdf",sep="")),w=15,h=15)
+boxplot(res,col=theColor,main="Ct expression of housekeeping genes per group")
+dev.off()
+}
+@
+
+\noindent If warnings have been created during the calculation process they appear here:
+
+<<hh,echo=FALSE,results=hide>>=
+if(file.exists(warningFile)){
+  bart   <- unlist(read.delim(warningFile,as.is=TRUE,header=FALSE))
+  fehler <- sapply(bart, function(y) gsub("simpleWarning in withCallingHandlers\\(\\{: ","",y))
+}
+@
+
+<<fehler,echo=FALSE>>=
+if(file.exists(warningFile))
+  fehler
+@
+
+\section*{Impressum}
+The following packages have been used for the calculation:
+<<session, results=tex>>=
+toLatex(sessionInfo())
+@
+
+\section*{Change Logs}
+\subsection*{Version 4.0}
+\begin{itemize}
+\item Add change logs to the end of the file
+\item Add errBarplot for both detector and sample views
+\item Adjust to the new ddCt package (developed by Jitao David Zhang
+  and Rudolf Biczok) which was submitted to the Bioconductor community
+\end{itemize}
+
+\end{document}
