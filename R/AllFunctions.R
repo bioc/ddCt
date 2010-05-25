@@ -125,9 +125,9 @@ uniquePlate   <- function(x) {
 ### utility functions
 ################################################################################
 
-getDir <- function(dir) {
+getDir <- function(dir, ...) {
   if(!file.exists(dir)) {
-    dir.create(dir)
+    dir.create(dir,...)
   }
   return(dir)
 }

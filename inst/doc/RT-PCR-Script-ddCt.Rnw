@@ -639,10 +639,14 @@ if(GROUPINGBYSAMPLES){
 }
 result.bySample <- errBarchart(result)
 print(result.bySample)
-dev.print(pdf, getFileName("errbarplot_bySample_", sho), width=15, height=15)
+pdf(getFileName("errbarplot_bySample_", sho), width=15, height=15)
+print(result.bySample)
+dev.off()
 result.byDetector <- errBarchart(result, by="Detector")
 print(result.byDetector)
-dev.print(pdf, getFileName("errbarplot_byDetector_", sho), width=15, height=15)
+pdf(getFileName("errbarplot_byDetector_", sho), width=15, height=15)
+print(result.byDetector)
+dev.off()
 @
 \newpage
 

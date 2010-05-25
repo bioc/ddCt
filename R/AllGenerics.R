@@ -31,6 +31,7 @@ setGeneric("ddCtErr", function(object,...) standardGeneric("ddCtErr"))
 setGeneric("numberCt", function(object,...) standardGeneric("numberCt"))
 setGeneric("numberNA", function(object,...) standardGeneric("numberNA"))
 
+setGeneric("Ct<-", function(object, value) standardGeneric("Ct<-"))
 ################################################################################
 ## Class InputFrame and InputReader
 ################################################################################

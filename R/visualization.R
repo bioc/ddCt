@@ -60,7 +60,7 @@ panel.ddCtErrBarchart <- function(x,y, thr,round, outText, parameter, ...) {
 
 ddCtErrBarchart <- function(x, by=c("Sample", "Detector"),
                             thr=3,
-                            xlab="Sample",ylab="Expression fold change",
+                            ylab="Expression fold change",
                             cols=brewer.pal(12, "Set3"),round=0, outText=TRUE, rot=45,
                             parameter=new("errBarchartParameter"),
                             ...) {
@@ -71,13 +71,14 @@ ddCtErrBarchart <- function(x, by=c("Sample", "Detector"),
   
   x$Sample <- factor(as.character(x$Sample))
   x$Detector <- factor(as.character(x$Detector))
-
+  
   by <- match.arg(by, choices=c("Sample", "Detector"))
   if(by=="Sample") {
     formula <- as.formula("exprs + level.err ~ Sample | Detector")
   } else  {
     formula <- as.formula("exprs + level.err ~ Detector | Sample")
   }
+  xlab <- by
   barchart(formula, data=x, 
            scales=list(x=list(rot=rot), y=list(alternating=1, at=seq(0, thr, 0.5))),
            ylim=c(0, thr*1.1),

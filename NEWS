@@ -1,4 +1,9 @@
-Release 0.99.9 (not finished yet, Rudi)
+Release 1.3.1
+Changes:
+    + Add RT-PCR-Script-ddCt.Rnw as an executive script for RT-PCR analysis
+    + Expose getDir method
+
+Release 0.99.9 (Rudi)
 Changes:
     + (r42686) Add classes "InputFrame","InputReader","SDMReader", "CSVReader" and "ColMap" Not documented nor tested yet, therefore internal for now.
     + (r42686) remove classes "SDMFrame" Not documented nor tested yet, therefore internal for now.

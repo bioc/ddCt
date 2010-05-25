@@ -198,6 +198,13 @@ setMethod("Ct", "InputFrame", function(object) {
   coreData(object)$Ct
 })
 
+
+## assign method
+setReplaceMethod("Ct", c("InputFrame", "numeric"), function(object, value) {
+  coreData(object)$Ct <- value
+  return(object)
+})
+
 ##----------------------------------------##
 ## casting methods
 ##----------------------------------------##
