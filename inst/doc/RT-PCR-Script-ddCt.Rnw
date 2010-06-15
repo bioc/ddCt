@@ -386,12 +386,7 @@ names.of.the.samples.NOT.in.cor    <- names.of.the.samples.NOT.in.Output
 
 \noindent Now all parameters have been set. You have to start R, change the directory if you like, and then type the following:
 
-Sweave("rt\_PCR\_Skript\_ddCt\_X\_X.Rnw")
-
-\noindent The X might differ, depending on the version of this script. In the
-current example the script is  version '3\_0':
-
-Sweave("rt\_PCR\_Skript\_ddCt\_3\_0.Rnw")
+Sweave("RT-PCR-Script-ddCt.Rnw")
 
 %
 %  ----------------------------------------------------------------------------
