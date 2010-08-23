@@ -38,12 +38,16 @@ panel.barchart.errbar <- function(x,y, subscripts, groups,
   }
 }
 
-panel.ddCtErrBarchart <- function(x,y, thr,round, outText, parameter, ...) {
+panel.ddCtErrBarchart <- function(x,y, thr,round, outText, parameter,
+                                  exprs.one.line=TRUE,
+                                  ...) {
   extremes <- which(y>thr);
   extremes <- extremes[extremes <= length(y)/2]
   nas <- which(is.na(y)); nas <- nas[nas <= length(y)/2]  
   panel.grid(v=0,h=-1)
-  panel.abline(h=1, lty="dashed", lwd=2, col="red")
+  if(exprs.one.line) {
+    panel.abline(h=1, lty="dashed", lwd=2, col="red")
+  }
   panel.barchart.errbar(x,y,col.errbar="black",thr=thr,...)
   if(outText & length(extremes)>0) {
     for ( i in seq(along=extremes)) {
@@ -58,19 +62,23 @@ panel.ddCtErrBarchart <- function(x,y, thr,round, outText, parameter, ...) {
   panel.text(x[nas], 0, exprsUndeterminedLabel(parameter), pos=3,font=2, col="darkgrey")
 }
 
+##assignInNamespace( "ddCtErrBarchart", ddCtErrBarchart, "ddCt")
+
 ddCtErrBarchart <- function(x, by=c("Sample", "Detector"),
                             thr=3,
                             ylab="Expression fold change",
                             cols=brewer.pal(12, "Set3"),round=0, outText=TRUE, rot=45,
                             parameter=new("errBarchartParameter"),
+                            detector.levels=levels(factor(as.character(x$Detector))),
+                            sample.levels=levels(factor(as.character(x$Sample))),
                             ...) {
 
   ## if all exprs is NA, the plot will not be interpretable
   if(all(is.na(x$exprs)))
     stop("All expressions are NA!\n")
   
-  x$Sample <- factor(as.character(x$Sample))
-  x$Detector <- factor(as.character(x$Detector))
+  x$Sample <- factor(as.character(x$Sample), sample.levels)
+  x$Detector <- factor(as.character(x$Detector), detector.levels)
   
   by <- match.arg(by, choices=c("Sample", "Detector"))
   if(by=="Sample") {

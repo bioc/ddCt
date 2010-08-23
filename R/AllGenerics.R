@@ -50,6 +50,7 @@ setGeneric("uniqueSampleNames<-",function(object, target, value) standardGeneric
 
 setGeneric("removeSample", function(object, sample) standardGeneric("removeSample"))
 setGeneric("removeDetector", function(object, detector) standardGeneric("removeDetector"))
+setGeneric("removeNTC", function(object) standardGeneric("removeNTC"))
 
 setGeneric("replaceSample", function(object, target, value) standardGeneric("replaceSample"))
 setGeneric("replaceDetector", function(object, target, value) standardGeneric("replaceDetector"))

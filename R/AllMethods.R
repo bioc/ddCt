@@ -297,6 +297,18 @@ setMethod("removeDetector", signature(object="InputFrame", detector="character")
             object <- object[!detectorNames(object) %in% detector,]
             return(object)
           })
+setMethod("removeNTC", "InputFrame", function(object) {
+  is.ntc <- grepl("^ntc",
+                  as.character(sampleNames(object)),
+                  ignore.case=TRUE)
+  return(object[!is.ntc,])
+})
+setMethod("removeNTC", "ddCtExpression", function(object) {
+  is.ntc <- grepl("^ntc",
+                  as.character(sampleNames(object)),
+                  ignore.case=TRUE)
+  return(object[,!is.ntc])
+})
 
 ##----------------------------------------##
 ## censoring
