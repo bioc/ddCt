@@ -77,7 +77,7 @@ exportMethods(coreData,
               "replaceSample",
               "removeDetector",
               "removeSample",
-              removeNTC)
+              "removeNTC")
 
 ## function utilities
 export("getDir")

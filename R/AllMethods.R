@@ -67,6 +67,11 @@ setMethod("elist", "ddCtExpression",
             return(df)
           })
 
+setMethod("summary", "ddCtExpression",
+          function(object, colnames=NULL) {
+            elist(object, colnames)
+          })
+
 setMethod("elistWrite",signature("ddCtExpression","character"), 
           definition = function(object,file, sep="\t", quote=FALSE, row.names=FALSE,colnames=NULL,...) {
             a <- elist(object, colnames)
