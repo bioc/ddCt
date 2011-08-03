@@ -6,7 +6,7 @@
 ##
 ##  AllGenerics.R
 ##  Created on: Oct 23, 2008
-##      Author: Jitao David Zhang <j.zhang@dkfz.de>, Rudolf Biczok <r.biczok@dkfz-heidelberg.de>
+##      Author: Jitao David Zhang <jitao_david.zhang@roche.com>, Rudolf Biczok <r.biczok@dkfz-heidelberg.de>
 ##      Description: ddCt generic methods
 ##
 ################################################################################

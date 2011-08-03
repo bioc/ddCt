@@ -17,7 +17,7 @@
 \value{
   \code{getDir} returns the directory name
 }
-\author{Jitao David Zhang <j.zhang@dkfz.de>}
+\author{Jitao David Zhang <jitao_david.zhang@roche.com>}
 %\seealso{
 %% ~~objects to See Also as \code{\link{help}}, ~~~
 %}

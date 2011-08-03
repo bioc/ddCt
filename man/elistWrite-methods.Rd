@@ -28,7 +28,7 @@ elistWrite(object,file,...)
   \code{elist} is a wrapper to \code{as(object, "data.frame")} function.
 }
 
-\author{Jitao David Zhang \email{j.zhang@dkfz.de}}
+\author{Jitao David Zhang \email{jitao_david.zhang@roche.com}}
 
 \examples{
 ## read a SDM file

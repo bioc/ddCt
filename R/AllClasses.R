@@ -7,7 +7,7 @@
 ##  AllClasses.R
 ##  Created on: Oct 23, 2008
 ##      Author: Rudolf Biczok <r.biczok@dkfz-heidelberg.de>
-##              Jitao David Zhang <j.zhang@dkfz-heidelberg.de>
+##              Jitao David Zhang <jitao_david.zhang@roche.com>
 ##      Description: ddCt classes
 ##
 ################################################################################

@@ -6,7 +6,7 @@
 ##
 ##  ddCt.R
 ##  Created on: Mar 31, 2009
-##      Author: Rudolf Biczok <r.biczok@dkfz-heidelberg.de>, Jitao David Zhang <j.zhang@dkfz.de>
+##      Author: Rudolf Biczok <r.biczok@dkfz-heidelberg.de>, Jitao David Zhang <jitao_david.zhang@roche.com>
 ##      Description: several internal functions used in the ddCt package
 ##    
 ################################################################################

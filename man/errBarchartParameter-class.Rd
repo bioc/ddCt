@@ -28,7 +28,7 @@ internally used, but in the near future it will be exported.
       print method}
 	 }
 }
-\author{ Jitao David Zhang <j.zhang@dkfz.de>}
+\author{ Jitao David Zhang <jitao_david.zhang@roche.com>}
 \note{ So far it is only internallly used }
 \examples{
 ## Internally used

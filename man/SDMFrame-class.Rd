@@ -167,7 +167,7 @@
   }
 }
 \author{ Rudolf Biczok \email{mailto:r.biczok@dkfz.de}, Jitao David
-  Zhang \email{mailto:j.zhang@dkfz.de}}
+  Zhang \email{mailto:jitao_david.zhang@roche.com}}
 \seealso{
   \code{\link{SDMFrame}} function reads in data from SDM
   files. Data from SDM files is used to construct
