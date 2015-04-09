@@ -512,14 +512,14 @@ ddCtExec <- function(params.new, sdmframe) {
     if(!is.null(params.new[[param.name]]))
       params[[param.name]] <- params.new[[param.name]]
   }
-
+      
   if(!missing(sdmframe))
     params$inputFile = fileNames(sdmframe)
 
   ddCt:::checkParams(params)
   
-  if(is.null(params$params$samplesRemainInTTest))
-    params$params$samplesRemainInTTest = params$samplesRemainInOutput
+  if(is.null(params$samplesRemainInTTest))
+    params$samplesRemainInTTest = params$samplesRemainInOutput
   if(is.null(params$samplesNotInTTest))
     params$samplesNotInTTest = params$samplesNotInOutput
   if(is.null(params$samplesRemainInCor))
