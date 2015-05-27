@@ -63,29 +63,37 @@ replaceVectorByEquality <- function(vector, target, value) {
 ### alias functions
 ################################################################################
 
-#InputFrame <- function(files, colmaping, ...) {
-#  return(new("InputFrame",files=files, colmaping=colmaping, ...));
-#}
-
 SDMFrame <- function(file) {
   return(InputFrame(new("SDMReader",files=file)))
 }
 
 
-CSVFrame <- function(file, colmap) {
+TSVFrame <- function(file, colmap) {
   if(!missing(colmap))
-    return(InputFrame(new("CSVReader",files=file,colmap=colmap)))
+    return(InputFrame(new("TSVReader",files=file,colmap=colmap)))
   else
-    return(InputFrame(new("CSVReader",files=file)))
+    return(InputFrame(new("TSVReader",files=file)))
 }
 
-ColMap <- function(...) {
-  return(new("ColMap",...));
+QuantStudioFrame <- function(file) {
+  return(InputFrame(new("QuantStudioReader", files=file)))
 }
 
-readSDM <- function(file) {
-  .Defunct("InputFrame",package="ddCt");
+DataFrame <- function(df, colmap) {
+  if(missing(colmap))
+    colmap <- ColMap()
+  return(InputFrame(new("DataFrameReader", df, colmap)))
 }
+
+ColMap <- function(sample=DEFAULT.SAMPLE.COLNAME,
+                   feature=DEFAULT.FEATURE.COLNAME,
+                   ct=DEFAULT.CT.COLNAME) {
+  new("ColMap",
+      sample=sample, feature=feature, ct=ct)
+}
+
+readSDM <- SDMFrame
+readQuantStudio <- QuantStudioFrame
 
 ################################################################################
 ### aux functions
