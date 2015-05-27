@@ -11,29 +11,46 @@
 ##
 ################################################################################
 
-import("Biobase")
+import(methods)
+importFrom(BiocGenerics, as.data.frame)
+importClassFrom(Biobase,
+                eSet, ExpressionSet, VersionedBiobase, Versioned)
+importFrom(Biobase,
+           exprs,assayData,
+           phenoData, pData, "phenoData<-", "pData<-",
+           featureData, fData, "featureData<-", "fData<-",
+           varLabels,
+           varMetadata, "varMetadata<-",
+           featureNames, "featureNames<-",
+           sampleNames, "sampleNames<-")
+importFrom(RColorBrewer, brewer.pal, brewer.pal.info)
+importFrom(lattice,
+           barchart,panel.barchart, panel.segments, panel.grid, panel.abline, panel.text)
+importFrom(xtable, xtable)
 
 ## export class
 exportClasses(ddCtExpression,
               InputFrame,
-              InputReader,
-              SDMReader,
-              CSVReader,
               ColMap)
+
+exportClasses(InputReader,
+              SDMReader,
+              TSVReader,
+              QuantStudioReader)
+
+export(QuantStudioFrame, readQuantStudio,
+       SDMFrame, readSDM,
+       TSVFrame)
 
 ## register S3 method
 S3method(as.data.frame, InputFrame)
 
-export(
-       barploterrbar,
+export(barploterrbar,
        ddCtAbsolute,
        #ddCtSplit,
        #ddCtErrBarchart,
        elist,
        errBarchart,
-       SDMFrame,
-       CSVFrame,
-       readSDM,
        ColMap)
 
 ## report auxilliary functions
@@ -57,8 +74,7 @@ exportMethods(level,
               ddCtExpression,
               errBarchart,
               InputFrame,
-              elistWrite
-              )
+              elistWrite)
 
 ## mainly for InputFrame
 exportMethods(coreData,
@@ -78,6 +94,10 @@ exportMethods(coreData,
               "removeDetector",
               "removeSample",
               "removeNTC")
+
+export(DEFAULT.SAMPLE.COLNAME,
+       DEFAULT.FEATURE.COLNAME,
+       DEFAULT.CT.COLNAME)
 
 ## function utilities
 export("getDir")

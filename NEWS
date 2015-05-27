@@ -1,3 +1,10 @@
+Release 1.24.0
+  + QuantStudio (LifeTechnologies) output files are now supported
+  + All packages that were 'depended on' are not explicitly 'imported from'. This has the effect that scripts depending on ddCt may explicitly load libraries (such as RColorBrewer and Biobase) to use functions therein.
+  + ColMap is now simplied to contain only three slots: Sample, Detector, and Ct.
+  + Class 'CSVReader' is now renamed into 'TSVReader' since it supports rather tab-delimited file, instead of comma-separated file
+  + A direct way to convert a data.frame to a InputFrame object is documented. See 'example(InputFrame)'.
+
 Release 1.3.1
 Changes:
     + Add RT-PCR-Script-ddCt.Rnw as an executive script for RT-PCR analysis
