@@ -5,12 +5,12 @@
    Write a 'data.frame' into an html table within a html page
 }
 \usage{
-write.htmltable(x, filename, title = "", sortby = NULL, decreasing = TRUE, open = "wt")
+write.htmltable(x, file, title = "", sortby = NULL, decreasing = TRUE, open = "wt")
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{x}{ 'data.frame' }
-  \item{filename}{ character. File name. }
+  \item{file}{ character. File name. }
   \item{title}{ character. Title of html page }
   \item{sortby}{ character. Name of column by which to sort the table rows }
   \item{decreasing}{ logical. Should the sort order be increasing or decreasing? }

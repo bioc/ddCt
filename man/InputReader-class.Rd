@@ -3,10 +3,10 @@
 \docType{class}
 \alias{InputReader-class}
 \alias{SDMReader-class}
-\alias{CSVReader-class}
+\alias{TSVReader-class}
+\alias{QuantStudioReader-class}
 \alias{ColMap}
-\alias{CSVFrame}
-\alias{InputFrame}
+\alias{TSVFrame}
 
 
 \title{Class "InputReader"}

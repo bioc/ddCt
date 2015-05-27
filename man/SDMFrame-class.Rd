@@ -24,6 +24,9 @@
 \alias{Ct<-}
 \alias{Ct<-,InputFrame,numeric-method}
 \alias{show,InputFrame-method}
+\alias{DEFAULT.CT.COLNAME}
+\alias{DEFAULT.FEATURE.COLNAME}
+\alias{DEFAULT.SAMPLE.COLNAME}
 
 
 %% currently SDMFrame only
