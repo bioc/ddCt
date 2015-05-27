@@ -234,6 +234,9 @@ information is also provided as the tab-delimited text file
 a text file specified by the parameter 'warningFile'.
 
 <<specifyFiles,results=hide>>=
+library(Biobase)
+library(lattice)
+library(RColorBrewer)
 library(ddCt)
 datadir <- function(x) system.file("extdata", x, package="ddCt")
 savedir <- function(x) file.path(tempdir(), x)

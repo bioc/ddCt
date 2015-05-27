@@ -393,6 +393,9 @@ Sweave("RT-PCR-Script-ddCt.Rnw")
 %
 
 <<lib, echo=FALSE, results=hide>>=
+library(Biobase)
+library(lattice)
+library(RColorBrewer)
 library(ddCt)
 @
 
