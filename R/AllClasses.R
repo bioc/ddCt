@@ -5,7 +5,6 @@
 ##
 ##
 ##  AllClasses.R
-##  Created on: Oct 23, 2008
 ##      Author: Rudolf Biczok <r.biczok@dkfz-heidelberg.de>
 ##              Jitao David Zhang <jitao_david.zhang@roche.com>
 ##      Description: ddCt classes
@@ -16,36 +15,24 @@
 ## utility classes
 ################################################################################
 
-##----------------------------------------------------------------------------##
-## Class ColMap
-##----------------------------------------------------------------------------##
- 
 setClass("ColMap",
-         representation(colmap="list")
-         )
+         representation=list(sample="character",
+           feature="character",
+           ct="character"),
+         prototype=list(sample=DEFAULT.SAMPLE.COLNAME,
+           feature=DEFAULT.FEATURE.COLNAME,
+           ct=DEFAULT.CT.COLNAME))
 
-##----------------------------------------------------------------------------##
-## Class ddCtParam
-##----------------------------------------------------------------------------##
- 
 setClass("ddCtParam",
-		 representation(type="character",default="ANY"))
-
-##----------------------------------------------------------------------------##
-## Visualization paramater set
-##----------------------------------------------------------------------------##
+         representation(type="character",default="ANY"))
 
 setClass("errBarchartParameter",
-         representation(exprsUndeterminedLabel="character"),
-         prototype(exprsUndeterminedLabel="ND"))
+         representation=list(exprsUndeterminedLabel="character"),
+         prototype=list(exprsUndeterminedLabel="ND"))
 
 ################################################################################
 ## container classes
 ################################################################################
-
-##----------------------------------------------------------------------------##
-## Class ddCtExpression
-##----------------------------------------------------------------------------##
 
 setClass("ddCtExpression",
          contains="ExpressionSet")
@@ -58,38 +45,17 @@ setClass("ddCtExpression",
  
 setClass("InputFrame",
          representation(coreData="data.frame",
-                        files="character")
-         )
+                        files="character"))
 
 ################################################################################
 ## reader classes
 ################################################################################
 
-##----------------------------------------------------------------------------##
-## Class InputReader
-## Description: abstract layer for valid input files
-##----------------------------------------------------------------------------##
- 
 setClass("InputReader",
          representation(files="character",
                         colmap="ColMap"),
-         contains=c("VIRTUAL")
-         )
+         contains=c("VIRTUAL"))
 
-##----------------------------------------------------------------------------##
-## Class SDMReader
-## Description: read a SDM file
-##----------------------------------------------------------------------------##
- 
-setClass("SDMReader",
-         contains=c("InputReader")
-         )
-
-##----------------------------------------------------------------------------##
-## Class CSVReader
-## Description: read a CSV file
-##----------------------------------------------------------------------------##
- 
-setClass("CSVReader",
-         contains=c("InputReader")
-         )
+setClass("SDMReader",contains=c("InputReader"))
+setClass("TSVReader",contains=c("InputReader"))
+setClass("QuantStudioReader",contains=c("InputReader"))
