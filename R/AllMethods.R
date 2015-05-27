@@ -768,10 +768,17 @@ setMethod("ddCtExec", "InputFrame",
 ##----------------------------------------##
 ## utility methods
 ##----------------------------------------##
-
+factor2char <- function(df) {
+  for(i in 1:ncol(df)) {
+    if(is.factor(df[,i])) {
+      df[,i] <- as.character(df[,i])
+    }
+  }
+  return(df)
+}
 setMethod("headtailPrint", "data.frame", function(object, head=2L, tail=2L, digits=NULL, quote=FALSE, right=TRUE, row.names=TRUE) {
-  subhead <- head(object, head)
-  subtail <- tail(object, tail)
+  subhead <- factor2char(head(object, head))
+  subtail <- factor2char(tail(object, tail))
   subomit <- object[1,]; subomit <- rep("...", ncol(object))
 
   subd <- rbind(subhead,subomit, subtail)
