@@ -2,7 +2,7 @@
 \title{ Write a data frame into a tab delimited file }
 \alias{writeSimpleTabCsv}
 \description{
-   Write a 'data.frame' into a tab delimited file (not quoted and no-row-name CSV file)
+   Write a 'data.frame' into a tab delimited file (not quoted and no-row-name TSV file)
 }
 \usage{
 writeSimpleTabCsv(x, file, ...)
