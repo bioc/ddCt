@@ -39,9 +39,6 @@ setGeneric("Ct<-", function(object, value) standardGeneric("Ct<-"))
 setGeneric("detectorNames",function(object) standardGeneric("detectorNames"))
 setGeneric("detectorNames<-",function(object, value) standardGeneric("detectorNames<-"))
 
-setGeneric("sampleNames",function(object) standardGeneric("sampleNames"))
-setGeneric("sampleNames<-",function(object, value) standardGeneric("sampleNames<-"))
-
 setGeneric("uniqueDetectorNames",function(object) standardGeneric("uniqueDetectorNames"))
 setGeneric("uniqueDetectorNames<-",function(object, target, value) standardGeneric("uniqueDetectorNames<-"))
 

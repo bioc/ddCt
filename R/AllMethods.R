@@ -35,7 +35,7 @@ setMethod("errBarchart", c("ddCtExpression", "character"),
 ##----------------------------------------##
 setAs(from="data.frame",to="ddCtExpression", 
       def=function(from) {
-        to.coreData <- from;
+        to@coreData <- from
       })
 
 ##----------------------------------------##
@@ -216,11 +216,6 @@ setReplaceMethod("Ct", c("InputFrame", "numeric"), function(object, value) {
 
 setAs(from="InputFrame", to="data.frame", def=function(from) {
   return(coreData(from))
-})
-
-setAs(from="data.frame", to="InputFrame", def=function(from) {
-  ## TODO: add check columns
-  return(new("InputFrame",from, file.name=as.character(NA)))
 })
 
 ### S3 methods
@@ -818,42 +813,6 @@ setMethod("rbind2", signature(x="InputFrame", y="data.frame"), function(x,y) {
 })
 
 ################################################################################
-## Class SDMFrame
-################################################################################
-
-##----------------------------------------##
-## readCoreData
-##----------------------------------------##
-
-## setMethod("readRawData", "SDMFrame", function(object) {
-## 	Ctvalues <- c()
-## 	for (file.name in  object@files){
-##           x <- scan(file=file.name,what="character",sep="\n",blank.lines.skip=TRUE,quiet=TRUE)
-##           CTstart <- grep("^Well",x)
-##           CTend   <- grep("^Summary",x)
-##           if(length(CTstart)==0 | length(CTend)==0) stop("Your file does not seem to be a .sdm file!")
-          
-##           number.of.skips <- CTstart - 1
-##           number.of.rows  <- (CTend - 1 ) - CTstart ## the first one becomes the Header and will not affect nrow
-##           w <- read.table(file.name,sep="\t",nrows=number.of.rows,skip=number.of.skips,header=TRUE,as.is=TRUE, blank.lines.skip = TRUE, comment.char="")
-##           if (! all (c("Ct","Detector","Sample")%in% colnames(w))) stop("Your file does not contain the columns 'Ct','Detector' and 'Sample.")
-##           w <- w[,c("Sample","Detector","Ct")]
-##           Platename <- rep(basename(file.name), nrow(w))
-##           Ctvalues <- rbind(Ctvalues,cbind(w,Platename))
-## 	}
-## 	ow <- getOption("warn")
-## 	options(warn=-1)
-## 	Ctvalues[,"Ct"] <- as.numeric(Ctvalues[,"Ct"])
-## 	options(warn=ow)
-## 	Ctvalues[,"Platename"] <- as.character( Ctvalues[,"Platename"])
-
-##         isNotNilStr <- Ctvalues$Sample!= "" & Ctvalues$Detector != ""
-## 	Ctvalues <- Ctvalues[isNotNilStr,]
-	
-## 	return(Ctvalues)
-## })
-
-################################################################################
 ## Class InputReader
 ################################################################################
 
@@ -866,13 +825,23 @@ setMethod("InputFrame", "InputReader",
             inputFrame <- new("InputFrame");
             for (file.name in object@files){
               rawData <- readRawData(object, file.name)
-              names(rawData)[object@colmap@colmap %in% colnames(rawData)] <- names(object@colmap@colmap)
+              names(rawData)[match(object@colmap@sample,colnames(rawData))] <- DEFAULT.SAMPLE.COLNAME
+              names(rawData)[match(object@colmap@feature,colnames(rawData))] <- DEFAULT.FEATURE.COLNAME
+              names(rawData)[match(object@colmap@ct,colnames(rawData))] <- DEFAULT.CT.COLNAME
               extra <- new("InputFrame", rawData, file.name)
               inputFrame <- rbind2(inputFrame, extra)
             }
             return(inputFrame)
           })
 
+setAs(from="data.frame", to="InputFrame", def=function(from) {
+  ## TODO: add check columns
+  return(new("InputFrame",from, file.name=as.character(NA)))
+})
+
+setMethod("InputFrame", "data.frame", function(object) {
+  as(object, "InputFrame")
+})
 ################################################################################
 ## Class SDMReader
 ################################################################################
@@ -882,12 +851,9 @@ setMethod("InputFrame", "InputReader",
 ##----------------------------------------##
 
 setMethod("initialize", "SDMReader",
-          function(.Object, files, colmap) {
+          function(.Object, files) {
             .Object@files <- files
-            if(missing(colmap))
-              .Object@colmap <- ColMap()
-            else
-              .Object@colmap <- colmap
+            .Object@colmap <- ColMap()
             return(.Object)
           })
 
@@ -910,28 +876,63 @@ setMethod("readRawData", signature(object="SDMReader",file.name="character"),
           })
 
 ################################################################################
-## Class CSVReader
+## Class TSVReader
 ################################################################################
 
 ##----------------------------------------##
 ## constructor 
 ##----------------------------------------##
 
-setMethod("initialize", "CSVReader",
-          function(.Object, files, colmap) {
+setMethod("initialize", "TSVReader",
+          function(.Object, files, colmap=ColMap()) {
             .Object@files <- files
-            if(!missing(colmap))
-              .Object@colmap <- colmap
+            .Object@colmap <- colmap
             return(.Object)
           })
 
-setMethod("readRawData", signature(object="CSVReader",file.name="character"),
+setMethod("readRawData", signature(object="TSVReader",file.name="character"),
           function(object, file.name) {
             rawdata <- read.table(file.name,sep="\t",
                                   header=TRUE,
                                   as.is=TRUE,
                                   blank.lines.skip = TRUE,
                                   comment.char="")
+            return(rawdata)
+          })
+
+################################################################################
+## Class QuantStudioReader
+################################################################################
+
+QUANTSTUDIO_COLMAP <- ColMap(sample="Sample Name",
+                             feature="Target Name",
+                             ct="Ct")
+
+setMethod("initialize", "QuantStudioReader",
+          function(.Object, files) {
+            .Object@files <- files
+            .Object@colmap <- QUANTSTUDIO_COLMAP
+            return(.Object)
+          })
+
+setMethod("readRawData", signature(object="QuantStudioReader",file.name="character"),
+          function(object, file.name) {
+            x <- scan(file = file.name, what = "character", sep = "\n", 
+                      blank.lines.skip = FALSE, quiet = TRUE)
+            CTstart <- grep("^Well", x)
+            isCT <- grepl("^[0-9]", x)
+            if (length(CTstart) == 0 | sum(isCT) == 0)  {
+              if(length(CTstart)==0)
+                message("No 'well' line found")
+              if(sum(isCT)==0)
+                message("No valid wells found")
+              stop("Your file", file, "does not seem to be a valid QuantStudio TaqMan file!")
+            }
+            number.of.skips <- CTstart - 1
+            number.of.rows <- sum(isCT)
+            rawdata <- read.table(file.name, sep = "\t", nrows = number.of.rows, quote="", 
+                                  skip = number.of.skips, header = TRUE, as.is = TRUE, 
+                                  blank.lines.skip = TRUE, comment.char = "", check.names=FALSE)
             return(rawdata)
           })
 
@@ -960,25 +961,4 @@ setMethod("show", "errBarchartParameter", function(object) {
   cat("Label for Undetermined:", exprsUndeterminedLabel(object), "\n")
 })
 
-################################################################################
-## Class ColMap
-################################################################################
 
-setMethod("initialize", "ColMap", function(.Object, ...) {
-  .Object@colmap <- list(...)
-  col.org <- allNames(.Object@colmap)
-  for (i in seq_along(.Object@colmap)) {
-    ei <- el(.Object@colmap, i)
-    if (!is.character(ei) || length(ei) != 1L || !nzchar(ei)) 
-      stop(gettextf("element %d of the original column name was not a single character string", 
-                    i))
-    ei <- el(col.org,i)
-    if (!is.character(ei) || length(ei) != 1L || !nzchar(ei)) 
-      stop(gettextf("element %d of the new column name was not a single character string", 
-                    i))
-  }
-  if (anyDuplicated(col.org)) 
-    stop(gettextf("duplicated column: %s", paste(sQuote(col.org[duplicated(col.org)]), 
-                                                     collapse = "")))
-  return(.Object)
-})
