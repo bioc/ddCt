@@ -46,7 +46,7 @@ writeLines.ddCt <- function(expSet, con=stdout(),sep="\n",type="html",name="expr
   writeLines(txt, con=con,sep=sep)
 }
 
-## write tab-delimited, not quoted and no-row-name CSV files
+## write tab-delimited, not quoted and no-row-name TSV files
 writeSimpleTabCsv <- function(x, file="",...) {
   Call <- match.call(expand.dots=TRUE)
   for(argname in c("row.names", "sep", "quote")) {
@@ -67,7 +67,7 @@ writeSimpleTabCsv <- function(x, file="",...) {
 ## filename: character with the name of the output file
 ## sortby:   name of a column in data frame din
 ##------------------------------------------------------------
-write.htmltable <- function (x, filename, title="", sortby=NULL, decreasing=TRUE, open="wt") {
+write.htmltable <- function (x, file, title="", sortby=NULL, decreasing=TRUE, open="wt") {
 
   if(!is.null(sortby)) {
     if(!sortby %in% colnames(x))
@@ -78,7 +78,7 @@ write.htmltable <- function (x, filename, title="", sortby=NULL, decreasing=TRUE
     x = x[order(soby, decreasing=decreasing), ]
   }
   
-  outfile <- file(paste(filename, ".html", sep=""), open=open)
+  outfile <- file(paste(file, ".html", sep=""), open=open)
   cat("<html>", "<STYLE>", 
       "<!--TD { FONT-FAMILY: Helvetica,Arial; FONT-SIZE: 14px;}-->",
       "<!--H1 { FONT-FAMILY: Helvetica,Arial; FONT-SIZE: 22px;}-->",
