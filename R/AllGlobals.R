@@ -28,3 +28,10 @@ SYS.PARAM.SYNTAX        <- "^--([^=\\s]+)=?([^\\s]*)$"
 ############################################
 PRIMARY.INPUT.COLS      <- c("Sample","Detector","Ct");
 
+##----------------------------------------##
+## Default sample, feature, and Ct column names
+##----------------------------------------##
+DEFAULT.SAMPLE.COLNAME <- "Sample"
+DEFAULT.FEATURE.COLNAME <- "Detector"
+DEFAULT.CT.COLNAME <- "Ct"
+
