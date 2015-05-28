@@ -28,6 +28,18 @@ importFrom(lattice,
            barchart,panel.barchart, panel.segments, panel.grid, panel.abline, panel.text)
 importFrom(xtable, xtable)
 
+## export what were imported
+export(exprs,assayData,
+       phenoData, pData, "phenoData<-", "pData<-",
+       featureData, fData, "featureData<-", "fData<-",
+       varLabels,
+       varMetadata, "varMetadata<-",
+       featureNames, "featureNames<-",
+       sampleNames, "sampleNames<-",
+       brewer.pal, brewer.pal.info,
+       barchart,panel.barchart, panel.segments, panel.grid, panel.abline, panel.text,
+       xtable)
+
 ## export class
 exportClasses(ddCtExpression,
               InputFrame,

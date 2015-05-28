@@ -13,7 +13,6 @@
 \alias{levelErr,ddCtExpression-method}
 \alias{numberCt,ddCtExpression-method}
 \alias{numberNA,ddCtExpression-method}
-%% currently ddCtExpression only
 \alias{Ct}
 \alias{CtErr}
 \alias{dCt}
@@ -24,6 +23,30 @@
 \alias{levelErr}
 \alias{numberCt}
 \alias{numberNA}
+\alias{exprs}
+\alias{assayData}
+\alias{phenoData}
+\alias{pData}
+\alias{"phenoData<-"}
+\alias{"pData<-"}
+\alias{featureData}
+\alias{"featureData<-"}
+\alias{"fData<-"}
+\alias{fData}
+\alias{varLabels}
+\alias{varMetadata}
+\alias{"varMetadata<-"}
+\alias{featureNames}
+\alias{"featureNames<-"}
+\alias{brewer.pal}
+\alias{brewer.pal.info}
+\alias{barchart}
+\alias{panel.barchart}
+\alias{panel.segments}
+\alias{panel.grid}
+\alias{panel.abline}
+\alias{panel.text}
+\alias{xtable}
 
 \title{ddCt Expression}
 \description{This class is a subclass of \code{ExpressionSet} and
