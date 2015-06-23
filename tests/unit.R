@@ -46,43 +46,46 @@ normalTest <- function() {
 
 library(package=pkg, character.only=TRUE)
 
-if(unitMode() != "unit") {
-  normalTest()
-  q("no");
-}
+# put this in an enclosure so we can return early
+(function() {
+    if(unitMode() != "unit") {
+        normalTest()
+        return()
+    }
 
-if(!require("RUnit", quietly=TRUE)) {
-  stop("cannot run unit tests -- package RUnit is not available")
-}
+    if(!require("RUnit", quietly=TRUE)) {
+        stop("cannot run unit tests -- package RUnit is not available")
+    }
 
-## --- Testing ---
-cat("------------------- BEGIN UNIT TESTS ----------------------\n\n")
-  
-## --- Setup test suit ---
-testSuite <- defineTestSuite(name=paste(pkg, "unit testing"), dirs=unit.path)
-tests <- runTestSuite(testSuite)
+    ## --- Testing ---
+    cat("------------------- BEGIN UNIT TESTS ----------------------\n\n")
 
-## --- Setup report directory ---
-pathReport <- file.path(getwd(),"report")
-if (!file.exists(pathReport)) {
-  dir.create(pathReport)
-}
+    ## --- Setup test suit ---
+    testSuite <- defineTestSuite(name=paste(pkg, "unit testing"), dirs=unit.path)
+    tests <- runTestSuite(testSuite)
 
-## --- Reporting ---
-cat("------------------- UNIT TEST SUMMARY ---------------------\n\n")
+    ## --- Setup report directory ---
+    pathReport <- file.path(getwd(),"report")
+    if (!file.exists(pathReport)) {
+        dir.create(pathReport)
+    }
 
-printTextProtocol(tests, showDetails=FALSE)
-printTextProtocol(tests, showDetails=FALSE,
-                  fileName=file.path(pathReport, "summary.txt"))
-printTextProtocol(tests, showDetails=TRUE,
-                  fileName=file.path(pathReport, "summary-detail.txt"))
-printHTMLProtocol(tests,
-                  fileName=file.path(pathReport, "summary.html"))
- 
-errors <- getErrors(tests)
-if(errors$nFail > 0 | errors$nErr > 0) {
-  warning(paste("\n\nunit testing failed (#unit failures: ", errors$nFail,
-             ", #R errors: ",  errors$nErr, ")\n\n", sep=""))
-  }
+    ## --- Reporting ---
+    cat("------------------- UNIT TEST SUMMARY ---------------------\n\n")
 
-cat("------------------- END OF UNIT TESTING -------------------\n\n")
+    printTextProtocol(tests, showDetails=FALSE)
+    printTextProtocol(tests, showDetails=FALSE,
+                      fileName=file.path(pathReport, "summary.txt"))
+    printTextProtocol(tests, showDetails=TRUE,
+                      fileName=file.path(pathReport, "summary-detail.txt"))
+    printHTMLProtocol(tests,
+                      fileName=file.path(pathReport, "summary.html"))
+
+    errors <- getErrors(tests)
+    if(errors$nFail > 0 | errors$nErr > 0) {
+        warning(paste("\n\nunit testing failed (#unit failures: ", errors$nFail,
+                      ", #R errors: ",  errors$nErr, ")\n\n", sep=""))
+    }
+
+    cat("------------------- END OF UNIT TESTING -------------------\n\n")
+})()
