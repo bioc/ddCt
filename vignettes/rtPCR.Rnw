@@ -156,7 +156,7 @@ the readout \Ct value, and $K_X$ is a constant. Similarly we can
 express the equation~\ref{eq:thr} for the endogenous reference gene
 (house-keeping genes) as
 \begin{equation}
-R_T = T_0 \times (1 + E_R)^{C_{T,R}} = K_R
+R_T = R_0 \times (1 + E_R)^{C_{T,R}} = K_R
 \label{eq:thrHKG}
 \end{equation}
 \noindent where $R_T$ is the threshold number of the reference
