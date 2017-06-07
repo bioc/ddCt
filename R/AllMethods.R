@@ -392,10 +392,11 @@ setMethod("ddCtWithEExec", "InputFrame",
             aaa <- object$Ct
             bbb <- object$Platename
             reduced.set <- object[,c("Sample","Detector")]
-
-            if (!all(housekeepingGenes %in% reduced.set[,2]))
+            reduced.fac <- list(Sample=reduced.set$Sample, Detector=reduced.set$Detector)
+            
+            if (!all(housekeepingGenes %in% reduced.set$Detector))
               stop("Not all of your housekeeping genes are in your table", call.=FALSE)
-            if (! all(calibrationSample %in% reduced.set[,1]))
+            if (! all(calibrationSample %in% reduced.set$Sample))
               stop("At least one of your reference samples is not in your table.", call.=FALSE)
             if (! type %in% c("median","mean"))
               stop("Type must be median or mean!", call.=FALSE)
@@ -404,35 +405,36 @@ setMethod("ddCtWithEExec", "InputFrame",
             sum.na         <- function(x) {sum(is.na(x))}
             unique.plate   <- function(x) {
               if (length(unique(x))!=1) warning(paste("g-s comb. on more than one plate:",paste(unique(x),collapse=",")))
-              return (unique(x)[1])}
+              return (unique(x)[1])
+            }
             
-            number.of.na           <- tapply(aaa,reduced.set,sum.na)                  # number of points with NA
-            number.of.all          <- tapply(aaa,reduced.set,length)                  # number of replication
+            number.of.na           <- tapply(aaa,reduced.fac,sum.na)                  # number of points with NA
+            number.of.all          <- tapply(aaa,reduced.fac,length)                  # number of replication
             
             if (type=="median"){
-              the.Ct.values         <- tapply(aaa,reduced.set,na.median,na.rm=TRUE)       # Median
-              error.Ct.mad          <- tapply(aaa,reduced.set,na.mad,na.rm=TRUE,con=1)    # MAD 
+              the.Ct.values         <- tapply(aaa,reduced.fac,na.median,na.rm=TRUE)       # Median
+              error.Ct.mad          <- tapply(aaa,reduced.fac,na.mad,na.rm=TRUE,con=1)    # MAD 
               error.Ct              <- error.Ct.mad/sqrt(number.of.all - number.of.na )
             } else {
-              the.Ct.values         <- tapply(aaa,reduced.set,na.mean,na.rm=TRUE)         # Mean
-              error.Ct.sd           <- tapply(aaa,reduced.set,na.sd,na.rm=TRUE)           # SD 
+              the.Ct.values         <- tapply(aaa,reduced.fac,na.mean,na.rm=TRUE)         # Mean
+              error.Ct.sd           <- tapply(aaa,reduced.fac,na.sd,na.rm=TRUE)           # SD 
               error.Ct              <- error.Ct.sd/sqrt(number.of.all - number.of.na ) # SEM 
             }
             
-            the.difference.values  <- tapply(aaa,reduced.set,the.difference)          # ratio long distance short distance
-            the.plate              <- tapply(bbb,reduced.set,unique.plate)
+            the.difference.values  <- tapply(aaa,reduced.fac,the.difference)          # ratio long distance short distance
+            the.plate              <- tapply(bbb,reduced.fac,unique.plate)
   
   
             ## warning messages if a reference sample or a housekeeping gene has no values
             
             for (sample in calibrationSample)
-              for( Detector in unique(reduced.set[,2])) {
+              for( Detector in unique(reduced.set$Detector)) {
                 if (is.na(the.Ct.values[sample,Detector]))
                   warning(paste("No value for gene",Detector,"in ref. sample",sample), call.=FALSE)
               }
   
             for (Detector in housekeepingGenes)
-              for( sample in unique(reduced.set[,1])){
+              for( sample in unique(reduced.set$Sample)){
                 if (is.na(the.Ct.values[sample,Detector]))
                   warning(paste("No value for housekeeping gene",Detector,"in sample",sample), call.=FALSE)
               }
