@@ -92,8 +92,9 @@ of \Rpackage{ddCt} (dependent on the version of your R program) and
 install it.
 
 <<ddCtInstall, eval=FALSE, echo=TRUE>>=
-source("http://www.bioconductor.org/biocLite.R")
-biocLite(ddCt)
+if (!requireNamespace("BiocManager", quietly=TRUE))
+    install.packages("BiocManager")
+BiocManager::install(ddCt)
 @ 
 
 To run this document and perform
