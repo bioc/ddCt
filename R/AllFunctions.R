@@ -280,9 +280,11 @@ getParams <- function(param.list) {
 }
 
 checkParams <- function(params) {
-  for(param.name in names(params)) {	
-    if(!is.null(params[[param.name]]) && is.na(params[[param.name]]))
+  for(param.name in names(params)) {
+    param <- params[[param.name]]
+    if(!is.null(param) && length(param)==1 && is.na(param)) {
       stop(gettextf("value for parameter \"%s\" is missing", param.name))
+    }
   }
 }
 
